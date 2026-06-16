@@ -22,6 +22,6 @@
   "seed_data_creation": "Created one customer (buyer_1781291389@test.com), 2 saved addresses (1 deleted at end), one COD order ORD-260612-9306 (৳1,350) with SOBUJ100 applied. SOBUJ100 usedCount incremented +1.",
   "retest_needed": false,
   "main_agent_can_self_test": true,
-  "context_for_next_testing_agent": "All customer-side flows (signup, address CRUD, cart add, checkout with saved address + coupon + COD) are green at https://217a33c5-c715-4345-9a3e-9abb0cb852d0.preview.emergentagent.com. Backend 19/19 still passing per iter_1. If new features are added, regenerate /app/backend/tests/test_backend.py and reuse the playwright pattern in this report. Pure Cow Ghee at ৳1450 reliably exceeds the SOBUJ100 ৳500 minimum-cart threshold.",
+  "context_for_next_testing_agent": "All customer-side flows (signup, address CRUD, cart add, checkout with saved address + coupon + COD) are green at https://no-signup-shop-1.preview.emergentagent.com. Backend 19/19 still passing per iter_1. If new features are added, regenerate /app/backend/tests/test_backend.py and reuse the playwright pattern in this report. Pure Cow Ghee at ৳1450 reliably exceeds the SOBUJ100 ৳500 minimum-cart threshold.",
   "rca of the issue": "N/A — previous iteration_1 blockers (missing testids on Addresses modal, ProductCard, Product detail Add-to-cart/Buy now, Auth inputs; setState-during-render in Checkout) have all been fixed by the main agent and verified in this run."
 }

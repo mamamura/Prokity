@@ -10,7 +10,7 @@ import sys
 from typing import Dict, Any, Optional
 
 # Backend URL from frontend/.env
-BASE_URL = "https://admin-dashboard-v2-58.preview.emergentagent.com/api"
+BASE_URL = "https://no-signup-shop-1.preview.emergentagent.com/api"
 
 # Test credentials
 ADMIN_EMAIL = "admin@organicshop.com"
