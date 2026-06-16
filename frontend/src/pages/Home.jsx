@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowRight, Leaf, ShieldCheck, Truck, Sparkles } from 'lucide-react';
+import { ArrowRight, Leaf, ShieldCheck, Truck, Sparkles, PackageSearch } from 'lucide-react';
 import { api, formatBDT } from '../lib/api';
 import ProductCard from '../components/ProductCard';
 import MobileHeader from '../components/MobileHeader';
@@ -81,6 +81,32 @@ const Home = () => {
             <div className="text-[10.5px] lg:text-sm font-semibold text-emerald-800 mt-1 lg:mt-2 leading-tight">{it.t}</div>
           </div>
         ))}
+      </div>
+
+      {/* Order tracker — prominent CTA so guests can quickly track without an account */}
+      <div className="px-4 mt-4 max-w-7xl mx-auto lg:px-6 lg:mt-6">
+        <Link
+          to="/track"
+          data-testid="home-track-card"
+          className="group relative block overflow-hidden rounded-2xl border border-emerald-200 bg-gradient-to-br from-amber-50 via-white to-emerald-50 p-3.5 lg:p-5 hover:border-emerald-400 hover:shadow-lg active:scale-[0.99] transition-all"
+        >
+          <div className="flex items-center gap-3">
+            <div className="relative w-12 h-12 lg:w-14 lg:h-14 rounded-2xl bg-gradient-to-br from-emerald-700 to-emerald-500 grid place-items-center shrink-0 shadow-md group-hover:scale-110 transition-transform">
+              <PackageSearch className="w-6 h-6 lg:w-7 lg:h-7 text-white" />
+              <span className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-amber-400 ring-2 ring-white animate-pulse" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="text-[11px] uppercase tracking-wider font-bold text-amber-700 inline-flex items-center gap-1">
+                <Truck className="w-2.5 h-2.5" /> অর্ডার ট্র্যাকার
+              </div>
+              <div className="font-extrabold text-[14.5px] lg:text-base text-emerald-900 mt-0.5 leading-tight">আপনার অর্ডার কোথায়?</div>
+              <div className="text-[11.5px] lg:text-[12.5px] text-neutral-600 mt-0.5 leading-snug">অর্ডার নম্বর ও মোবাইল নম্বর দিয়ে সরাসরি ট্র্যাক করুন</div>
+            </div>
+            <div className="shrink-0 inline-flex items-center gap-1 bg-emerald-700 text-white text-[12px] font-bold px-3 lg:px-4 h-9 rounded-full group-hover:bg-emerald-800 transition-colors">
+              ট্র্যাক <ArrowRight className="w-3.5 h-3.5" />
+            </div>
+          </div>
+        </Link>
       </div>
 
       {/* Categories */}

@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Search, Leaf, ShoppingBag, User, LayoutGrid, Home, LogOut, Bell } from 'lucide-react';
+import { Search, ShoppingBag, User, LayoutGrid, Home, LogOut, Bell } from 'lucide-react';
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useNotifications } from '../contexts/NotifContext';
+import Logo from './Logo';
 
 const navItems = [
   { to: '/', label: 'হোম', icon: Home, exact: true },
@@ -31,11 +32,11 @@ const DesktopNav = () => {
   return (
     <header className="hidden lg:block sticky top-0 z-40 bg-white border-b border-neutral-200">
       <div className="max-w-7xl mx-auto px-6 h-16 flex items-center gap-6">
-        <Link to="/" className="flex items-center gap-2">
-          <div className="w-9 h-9 rounded-xl bg-emerald-700 grid place-items-center"><Leaf className="w-5 h-5 text-white" /></div>
+        <Link to="/" data-testid="desktop-nav-logo" className="flex items-center gap-2">
+          <Logo size="md" />
           <div className="leading-tight">
-            <div className="font-extrabold text-neutral-900" style={{ fontFamily: "'Hind Siliguri', 'Noto Sans Bengali', Inter, sans-serif" }}>প্রকৃতির ঘ্রাণ</div>
-            <div className="text-[10px] text-neutral-500 -mt-0.5">Pure · Organic · Local</div>
+            <div className="font-extrabold text-neutral-900 text-[15px]" style={{ fontFamily: "'Hind Siliguri', 'Noto Sans Bengali', Inter, sans-serif" }}>প্রকৃতির ঘ্রাণ</div>
+            <div className="text-[10px] text-emerald-700 -mt-0.5 font-medium">খাঁটি পণ্য, সুস্থ জীবন</div>
           </div>
         </Link>
 

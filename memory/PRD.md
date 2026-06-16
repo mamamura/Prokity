@@ -1,59 +1,92 @@
-# প্রকৃতির ঘ্রাণ (Organic Shop) — PRD
+# প্রকৃতির ঘ্রাণ (Prokritir Ghran) — Organic Shop PRD
 
-## Original problem statement (verbatim)
-> ওয়েব অ্যাপটির ডিজাইন আরো সুন্দর মসৃণ করতে হবে। ইউজারের প্রোফাইল অপশনে একটি অ্যাড্রেস সেকশন থাকবে যেখানে ইউজাররা অ্যাড্রেস যোগ করতে পারবে এবং সেই একই অ্যাড্রেসটা বারবার চেকআউট করার সময় ওখানে সে সেভ করা অ্যাড্রেসটি দ্বারা অর্ডার করতে পারবে। অ্যাডমিন লগিনের সিক্রেট লিঙ্কটা আমাকে দিবে এখানে। আরো যে সকল ফিচার যোগ করতে হবে সবগুলো সুন্দরভাবে যোগ করতে হবে। অ্যাডমিন প্যানেল থেকে যাতে পুরোপুরি ওয়েব অ্যাপটাকে সুন্দরভাবে কন্ট্রোল করা যায় এবং তার পরিবর্তন, পরিবর্ধন সবকিছু করা যায় সেই অনুযায়ী শক্তিশালী ঐ অ্যাডমিন ড্যাশবোর্ড সেভাবে তৈরি করতে হবে।
+## Original Problem Statement
+User wants a Bengali-first organic-products e-commerce experience with:
+1. **Guest checkout** — no mandatory signup/login to purchase; users buy by giving address + phone.
+2. **PDF receipt download** after order confirmation.
+3. **Tracker number** so users can track their products (without an account).
+4. **Login/Signup hint** kept on Checkout & Profile pages.
+5. **Wishlist, Saved Addresses, Notifications, Messages** remain login-dependent.
+6. **Admin panel & admin login unchanged.**
+7. **Admin dashboard control** for product discount, delivery fee, and other site settings.
+8. **Full Bengali UI.**
 
-## Stack
-- Frontend: React + Tailwind, react-router-dom, Context (Auth, Cart)
-- Backend: FastAPI (Python) + Motor (MongoDB)
-- Hot reload via supervisor (backend port 8001, frontend 3000)
+User language: **Bengali (বাংলা)** — agent responds in Bengali.
 
-## Secret admin link
-`{REACT_APP_BACKEND_URL}/portal-7x9k2m4p8q3z6n1v`
+## Architecture
+```
+/app/
+├── backend/server.py          # FastAPI single-file API (~1370 lines)
+├── backend/tests/             # pytest backend tests
+└── frontend/src/
+    ├── App.js                 # Routes
+    ├── contexts/CartContext.jsx       # Cart + pricing rules from /settings/site
+    ├── pages/
+    │   ├── Checkout.jsx       # Guest + logged-in unified
+    │   ├── Track.jsx          # Public /track
+    │   ├── Receipt.jsx        # Public /receipt/:orderNo (PDF via window.print)
+    │   ├── Profile.jsx        # Guest sees localStorage guest orders + /track link
+    │   ├── Cart.jsx, Auth.jsx, Home.jsx, ...
+    │   └── admin/Settings.jsx # Admin Pricing tab (discount, tax, min-order)
+    └── components/
+        ├── ChatWidget, BottomNav, DesktopNav, MobileHeader (Bengali)
+        └── ui/ (shadcn)
+```
 
-## What's implemented (this session — 12 Jun 2026)
-### Customer
-- **Address book** (`/profile/addresses`) with Bangladesh-style fields (label, fullName, phone, address, area, city, district, division, postalCode, note, isDefault)
-- Add/edit/delete addresses, default address management
-- **Checkout** uses saved addresses (card selector) and falls back to one-time entry with "Save for next time"
-- **Coupon code** field at checkout — applies discount line item
-- Smooth animations (in/out modals, scale on press, hover transitions)
+## Tech Stack
+- **Frontend**: React (CRA), TailwindCSS, Axios, lucide-react
+- **Backend**: FastAPI + Motor (async MongoDB) + JWT auth
+- **DB**: MongoDB
 
-### Admin (`/portal-7x9k2m4p8q3z6n1v`)
-- New nav items: **Banners**, **Coupons**
-- **Banners** CRUD with image upload (base64), CTA label/link, active flag, ordering
-- **Coupons** CRUD (flat / percent, minOrder, maxDiscount, usageLimit, expiry, active)
-- **Settings tabs**: Payment / Site info (brand, contact, social, about) / Delivery (fee, free delivery threshold)
-- Existing pages: Dashboard, Analytics, Products, Categories, Orders, Customers, Messages
+## Key Data Models
+- `orders`: `{id, orderNo, user_id (nullable for guests), items, address, paymentMethod, paymentStatus, paymentPhone, paymentTxn, subtotal, delivery, discount, total, couponCode, status, history[], createdAt}`
+- `site_settings` (singleton): `{deliveryFee, freeDeliveryAbove, globalDiscountPercent, globalDiscountLabel, taxPercent, minOrderAmount, siteName, tagline, contactPhone, ...}`
 
-### Backend APIs added
-- `GET/POST/PUT/DELETE /api/auth/me/addresses[/{id}]`
-- `GET /api/settings/site` (public) · `PUT /api/admin/settings/site`
-- `GET /api/banners` (public) · `GET/POST/PUT/DELETE /api/admin/banners[/{id}]`
-- `GET/POST/PUT/DELETE /api/admin/coupons[/{id}]` · `POST /api/coupons/apply`
-- `POST /api/orders` now accepts `couponCode`, `discount` and increments coupon `usedCount`
-- Cart delivery rules now read from site settings (deliveryFee, freeDeliveryAbove)
+## Key API Endpoints
+- `POST /api/orders` — accepts both authed users and guests (`user=Depends(get_optional_user)`).
+- `GET /api/orders/track/{orderNo}?phone=...` — **public** tracking; matches by `orderNo` + last-6-digit phone fuzzy match.
+- `GET /api/settings/site` — public site settings (includes pricing).
+- `PUT /api/admin/settings/site` — admin updates pricing/delivery/etc.
+- `GET /api/settings/payment` — public payment methods.
 
-### Seeded data
-- Default site settings, one hero banner, **SOBUJ100** welcome coupon (flat ৳100 off, min ৳500)
-- Admin: `admin@organicshop.com` / `admin123`
+## What's Been Implemented
 
-## Test status
-- Backend: 19/19 pytest pass (auth, address CRUD, site/banner/coupon, order+coupon)
-- Frontend: 100% — signup, address add/edit/default badge, product add-to-cart, checkout with saved address + coupon + COD, view order, delete address
+### Iteration 1–2 (carry-over)
+- Catalog, cart, search, product details, admin panel, payment manual flow (bKash/Nagad), coupons.
 
-## Roadmap (P1/P2 backlog)
-- P1: Banner carousel (multiple active banners) on Home; site name/footer rendered from settings
-- P1: Order export (CSV), bulk product import, low-stock alerts
-- P2: Customer reviews/ratings, wishlists, push notifications
-- P2: SMS OTP login, Google/FB social login
-- P2: Refactor `/app/backend/server.py` into `routers/{auth,products,orders,admin}.py`
-- P2: Dark mode toggle for storefront
+### Iteration 3 — current session (Feb 2026)
+- **Guest checkout** — backend `POST /api/orders` accepts unauthenticated requests; sets `user_id=null`.
+- **Public order tracking** — `GET /api/orders/track/{orderNo}?phone=...` with phone match; wrong phone rejects.
+- **Receipt page** — `/receipt/:orderNo?phone=...` renders a Bengali printable invoice; **PDF via browser print** (`window.print()`) with print stylesheet for clean output.
+- **Login/Signup hint** — Visible banner on `/checkout` for guests with `লগইন` + `সাইনআপ` buttons.
+- **LocalStorage guest orders** — On guest checkout success, orderNo+phone saved to `os_guest_orders`. Profile page (guest mode) lists these with `ট্র্যাক` buttons.
+- **Profile guest mode** — "গেস্ট অপশন" section with `/track` link + guest-orders list.
+- **Admin pricing controls** — New `Pricing` tab in admin Settings:
+  - Global Discount % (applies to cart subtotal)
+  - Promo label (shown as banner in cart/checkout)
+  - VAT/Tax %
+  - Minimum order amount
+- **CartContext** auto-fetches `/settings/site`, applies `siteDiscount`, `tax`, `delivery` reactively.
+- **Bengali UI** — Translated: Home, Cart, Checkout, Track, Receipt, Profile, Auth (login/signup), Search, Categories, Product, Wishlist, Orders, Notifications, EditProfile, Addresses, ChatWidget, BottomNav, MobileHeader, DesktopNav.
+- **Protected routes** still gated: `/wishlist`, `/notifications`, `/messages`, `/orders`, `/profile/addresses`, `/profile/edit` — redirect to `/login`.
+- **Admin login** — unchanged at `/portal-7x9k2m4p8q3z6n1v`.
 
-## Files of reference
-- `/app/backend/server.py`
-- `/app/frontend/src/pages/Addresses.jsx`, `Checkout.jsx`, `Profile.jsx`, `Auth.jsx`, `Home.jsx`
-- `/app/frontend/src/pages/admin/{Dashboard,Settings,Banners,Coupons}.jsx`
-- `/app/frontend/src/contexts/CartContext.jsx`
-- `/app/frontend/src/components/ProductCard.jsx`
-- `/app/frontend/src/lib/admin-path.js`
+## Test Results
+- **Iteration 3**: 15/15 backend pytest passed (`/app/backend/tests/test_guest_checkout.py`); full frontend E2E green.
+- See `/app/test_reports/iteration_3.json`.
+
+## Backlog / P1+
+- Split `server.py` into routers (orders / settings / admin / auth) for maintainability.
+- Validate Bangladeshi phone format on guest checkout (e.g. `^01[3-9]\d{8}$`).
+- Rate-limit `/api/orders/track` to prevent enumeration.
+- Add admin-controlled `bnText` content per category for full localization of DB-driven content.
+- Email/SMS notification on order confirmation (using contactPhone in settings).
+- Optional: provide a fallback "Continue as guest" button below the Login page.
+
+## Files of Reference
+- Backend: `/app/backend/server.py`
+- Frontend pages: `/app/frontend/src/pages/{Checkout,Track,Receipt,Profile,Cart}.jsx`
+- Admin: `/app/frontend/src/pages/admin/Settings.jsx`
+- Cart: `/app/frontend/src/contexts/CartContext.jsx`
+- Routes: `/app/frontend/src/App.js`
+- Tests: `/app/backend/tests/test_guest_checkout.py`

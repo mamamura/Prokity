@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../hooks/use-toast';
-import { Leaf, Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff } from 'lucide-react';
+import Logo from '../components/Logo';
 
 export const Login = () => {
   const { login } = useAuth();
@@ -30,7 +31,7 @@ export const Login = () => {
   return (
     <div className="min-h-full bg-white px-6 pt-12 pb-8">
       <div className="text-center mb-8">
-        <div className="w-14 h-14 mx-auto rounded-2xl bg-emerald-700 grid place-items-center"><Leaf className="w-7 h-7 text-white" /></div>
+        <Logo size="xxl" className="mx-auto" />
         <h1 className="text-2xl font-extrabold mt-3" style={{ fontFamily: "'Hind Siliguri', 'Noto Sans Bengali', Inter, sans-serif" }}>প্রকৃতির ঘ্রাণ</h1>
         <p className="text-sm text-neutral-500 mt-1">অর্গানিক কেনাকাটা চালিয়ে যেতে লগইন করুন।</p>
       </div>
@@ -71,7 +72,7 @@ export const Signup = () => {
   return (
     <div className="min-h-full bg-white px-6 pt-10 pb-8">
       <div className="text-center mb-6">
-        <div className="w-14 h-14 mx-auto rounded-2xl bg-emerald-700 grid place-items-center"><Leaf className="w-7 h-7 text-white" /></div>
+        <Logo size="xxl" className="mx-auto" />
         <h1 className="text-2xl font-extrabold mt-3" style={{ fontFamily: "'Hind Siliguri', 'Noto Sans Bengali', Inter, sans-serif" }}>প্রকৃতির ঘ্রাণ</h1>
         <p className="text-sm text-neutral-500 mt-1">আপনার অ্যাকাউন্ট তৈরি করুন — খাঁটি অর্গানিক, দরজায় পৌঁছে যাবে।</p>
       </div>
