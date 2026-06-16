@@ -1,0 +1,30 @@
+{
+  "summary": "End-to-end verification of guest checkout, PDF receipt, public order tracking, profile localStorage guest orders, login/signup hint on checkout, admin pricing/delivery settings + cart application, and Bengali UI. Backend: 15/15 pytest passed against the live preview URL. Frontend: full guest journey produced ORD-260616-5474 → success screen with orderNo/PDF link/track link → /receipt/ORD-... rendered Bengali invoice with order-no + download button → /track with correct phone showed status timeline (গৃহীত/নিশ্চিত/প্রেরিত), wrong phone correctly rejected with 'অর্ডার খুঁজে পাওয়া যায়নি' → /profile as guest showed guest-options + guest-order-{orderNo} card from localStorage. Login/signup hint banner + buttons visible on /checkout for guests. Admin pricing tab saved globalDiscountPercent=10 + label='টেস্ট ডিসকাউন্ট'; verified via GET /api/settings/site; cart immediately showed the discount banner '... চলছে — সব পণ্যে 10% ছাড়!' and '-৳32' (10% of ৳320) discount line. Delivery settings persist. Protected routes (/wishlist, /orders, /profile/addresses, /profile/edit) correctly redirect to /login; /notifications page shows login-required state. Admin URL is /portal-7x9k2m4p8q3z6n1v (not /admin-secret-x9k3p as stated in the request — already configured this way in /app/frontend/src/lib/admin-path.js).",
+  "backend_issues": { "critical": [], "minor": [] },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_guest_checkout.py",
+    "/app/test_reports/pytest/iter3_guest.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Admin path mismatch with spec — code uses '/portal-7x9k2m4p8q3z6n1v' but the review request says '/admin-secret-x9k3p'. Decide which one is canonical and update either /app/frontend/src/lib/admin-path.js or the spec/test_credentials.md.",
+    "server.py is now 1366 lines — split into routers (orders/settings/admin/auth) for maintainability (carry-over).",
+    "POST /api/orders for guests does not require any phone format validation — a 4-character non-empty phone is accepted. Consider validating Bangladeshi phone format (e.g. /^01[3-9]\\d{8}$/) to keep tracking reliable.",
+    "/api/orders/track uses last-6-digit fuzzy match — fine for UX but means anyone who guesses an order number and tries common 6-digit suffixes could enumerate orders. Acceptable for demo; flag for production hardening (consider stricter match or rate-limit on /track).",
+    "GET /api/orders/track with empty phone returns 422 (Pydantic) rather than the spec's 'Phone is required' 400 because phone is a required query param. Cosmetic.",
+    "Signup page button reads 'অ্যাকাউন্ট তৈরি করুন' (Create account) instead of literal 'সাইনআপ' — semantically equivalent and acceptable, but the spec listed 'সাইনআপ' as expected text. Just a heads-up if strict text matching is needed."
+  ],
+  "updated_files": ["/app/backend/tests/test_guest_checkout.py"],
+  "success_rate": { "backend": "100%", "frontend": "100%" },
+  "test_credentials": "Admin: admin@organicshop.com / admin123 at /portal-7x9k2m4p8q3z6n1v",
+  "seed_data_creation": "Created several guest orders (ORD-260616-5474 visible in run + 3 more from pytest TestPublicTracking tests). Admin pricing settings were temporarily set to globalDiscountPercent=10, label='টেস্ট ডিসকাউন্ট' for cart-discount verification, then reset to 0 / '' via admin API. Site settings end state: discount=0, label='', deliveryFee=60, freeDeliveryAbove=500 (defaults).",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "All iteration-3 features (guest checkout, PDF receipt, public tracking, guest localStorage orders, login/signup hint banner, admin pricing/delivery settings, global discount application in cart, Bengali UI, protected-route gating) are green at https://9c6057d1-2678-4e50-9365-76170043a523.preview.emergentagent.com. Pytest file: /app/backend/tests/test_guest_checkout.py (15 tests). Earlier iteration tests still pass (see /app/backend/tests/test_iteration3.py, test_backend.py). Admin URL: /portal-7x9k2m4p8q3z6n1v.",
+  "rca of the issue": "N/A — no blockers found."
+}

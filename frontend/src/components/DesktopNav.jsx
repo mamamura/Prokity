@@ -6,8 +6,9 @@ import { useAuth } from '../contexts/AuthContext';
 import { useNotifications } from '../contexts/NotifContext';
 
 const navItems = [
-  { to: '/', label: 'Home', icon: Home, exact: true },
-  { to: '/categories', label: 'Categories', icon: LayoutGrid },
+  { to: '/', label: 'হোম', icon: Home, exact: true },
+  { to: '/categories', label: 'ক্যাটাগরি', icon: LayoutGrid },
+  { to: '/track', label: 'অর্ডার ট্র্যাক', icon: Search },
 ];
 
 const DesktopNav = () => {
@@ -49,8 +50,8 @@ const DesktopNav = () => {
         <form onSubmit={submit} className="flex-1 max-w-xl mx-auto">
           <div className="flex items-center h-11 rounded-full bg-neutral-100 border border-neutral-200 hover:border-neutral-300 focus-within:border-emerald-400 transition-colors overflow-hidden">
             <Search className="w-4 h-4 text-neutral-500 ml-4" />
-            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search honey, oil, spices…" className="flex-1 h-full bg-transparent px-3 text-sm outline-none placeholder:text-neutral-500" />
-            <button type="submit" className="h-9 mr-1.5 px-4 rounded-full bg-emerald-700 text-white text-sm font-medium hover:bg-emerald-800">Search</button>
+            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="মধু, তেল, মসলা খুঁজুন…" className="flex-1 h-full bg-transparent px-3 text-sm outline-none placeholder:text-neutral-500" />
+            <button type="submit" className="h-9 mr-1.5 px-4 rounded-full bg-emerald-700 text-white text-sm font-medium hover:bg-emerald-800">খুঁজুন</button>
           </div>
         </form>
 
@@ -65,7 +66,7 @@ const DesktopNav = () => {
           )}
           <Link to="/cart" className="relative px-3 py-2 rounded-lg hover:bg-neutral-100 transition-colors flex items-center gap-1.5">
             <ShoppingBag className="w-5 h-5 text-neutral-700" />
-            <span className="text-sm font-medium">Cart</span>
+            <span className="text-sm font-medium">কার্ট</span>
             {cartCount > 0 && (<span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] px-1 flex items-center justify-center">{cartCount}</span>)}
           </Link>
           {user ? (
@@ -84,14 +85,14 @@ const DesktopNav = () => {
                       <div className="text-sm font-semibold truncate">{user.name}</div>
                       <div className="text-[11px] text-neutral-500 truncate">{user.email}</div>
                     </div>
-                    <Link to="/profile" onClick={() => setOpen(false)} className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-neutral-50"><User className="w-4 h-4" /> Profile & orders</Link>
-                    <button onClick={() => { logout(); setOpen(false); nav('/'); }} className="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-red-50 text-red-600"><LogOut className="w-4 h-4" /> Logout</button>
+                    <Link to="/profile" onClick={() => setOpen(false)} className="flex items-center gap-2 px-3 py-2 text-sm hover:bg-neutral-50"><User className="w-4 h-4" /> প্রোফাইল ও অর্ডার</Link>
+                    <button onClick={() => { logout(); setOpen(false); nav('/'); }} className="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-red-50 text-red-600"><LogOut className="w-4 h-4" /> লগআউট</button>
                   </div>
                 </>
               )}
             </div>
           ) : (
-            <Link to="/login" className="ml-1 inline-flex items-center gap-2 bg-emerald-700 text-white text-sm font-semibold px-4 h-10 rounded-full hover:bg-emerald-800">Sign in</Link>
+            <Link to="/login" className="ml-1 inline-flex items-center gap-2 bg-emerald-700 text-white text-sm font-semibold px-4 h-10 rounded-full hover:bg-emerald-800">লগইন</Link>
           )}
         </div>
       </div>

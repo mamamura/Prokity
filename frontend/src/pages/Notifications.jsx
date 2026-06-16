@@ -16,10 +16,10 @@ const timeAgo = (iso) => {
   try {
     const d = new Date(iso);
     const diff = (Date.now() - d.getTime()) / 1000;
-    if (diff < 60) return 'just now';
-    if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
-    if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
-    if (diff < 86400 * 7) return `${Math.floor(diff / 86400)}d ago`;
+    if (diff < 60) return 'এইমাত্র';
+    if (diff < 3600) return `${Math.floor(diff / 60)} মিনিট আগে`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)} ঘণ্টা আগে`;
+    if (diff < 86400 * 7) return `${Math.floor(diff / 86400)} দিন আগে`;
     return d.toLocaleDateString();
   } catch { return ''; }
 };
@@ -38,12 +38,12 @@ const NotificationsPage = () => {
   if (!user) {
     return (
       <div className="pb-4 max-w-2xl mx-auto lg:px-6">
-        <MobileHeader title="Notifications" back hideSearch />
+        <MobileHeader title="নোটিফিকেশন" back hideSearch />
         <div className="px-6 py-16 text-center">
           <div className="w-16 h-16 mx-auto rounded-full bg-emerald-50 grid place-items-center"><Bell className="w-7 h-7 text-emerald-600" /></div>
-          <h2 className="text-lg font-extrabold mt-4">Sign in to view notifications</h2>
-          <p className="text-sm text-neutral-500 mt-1">Order updates, offers and account alerts will appear here.</p>
-          <Link to="/login?next=/notifications" className="inline-flex mt-5 items-center gap-2 bg-emerald-600 text-white px-5 h-11 rounded-full text-sm font-semibold">Sign in</Link>
+          <h2 className="text-lg font-extrabold mt-4">নোটিফিকেশন দেখতে লগইন করুন</h2>
+          <p className="text-sm text-neutral-500 mt-1">অর্ডার আপডেট, অফার ও অ্যাকাউন্ট অ্যালার্ট এখানে দেখা যাবে।</p>
+          <Link to="/login?next=/notifications" className="inline-flex mt-5 items-center gap-2 bg-emerald-600 text-white px-5 h-11 rounded-full text-sm font-semibold">লগইন</Link>
         </div>
       </div>
     );
@@ -51,34 +51,34 @@ const NotificationsPage = () => {
 
   return (
     <div className="pb-4 max-w-2xl mx-auto lg:px-6">
-      <MobileHeader title="Notifications" back hideSearch />
+      <MobileHeader title="নোটিফিকেশন" back hideSearch />
       <div className="hidden lg:flex items-center justify-between mt-6 mb-4">
         <div>
-          <h1 className="text-3xl font-extrabold">Notifications</h1>
-          <p className="text-sm text-neutral-500 mt-1">{unread} unread · {items.length} total</p>
+          <h1 className="text-3xl font-extrabold">নোটিফিকেশন</h1>
+          <p className="text-sm text-neutral-500 mt-1">{unread} অপঠিত · মোট {items.length}</p>
         </div>
         {unread > 0 && (
           <button onClick={markAllRead} className="text-sm font-semibold text-emerald-700 hover:text-emerald-800 inline-flex items-center gap-1.5">
-            <CheckCheck className="w-4 h-4" /> Mark all as read
+            <CheckCheck className="w-4 h-4" /> সব পড়া হিসেবে চিহ্নিত করুন
           </button>
         )}
       </div>
       {unread > 0 && (
         <div className="lg:hidden px-4 pt-3 flex items-center justify-between">
-          <div className="text-[12px] text-neutral-500">{unread} unread</div>
+          <div className="text-[12px] text-neutral-500">{unread} অপঠিত</div>
           <button onClick={markAllRead} className="text-[12px] font-semibold text-emerald-700 inline-flex items-center gap-1">
-            <CheckCheck className="w-3.5 h-3.5" /> Mark all read
+            <CheckCheck className="w-3.5 h-3.5" /> সব পড়া
           </button>
         </div>
       )}
       <div className="px-4 mt-3 lg:px-0 space-y-2">
         {loading ? (
-          <div className="py-10 text-center text-sm text-neutral-500">Loading…</div>
+          <div className="py-10 text-center text-sm text-neutral-500">লোড হচ্ছে…</div>
         ) : items.length === 0 ? (
           <div className="py-16 text-center">
             <AlertCircle className="w-9 h-9 text-neutral-300 mx-auto" />
-            <h2 className="text-base font-bold mt-3">No notifications yet</h2>
-            <p className="text-xs text-neutral-500 mt-1">We'll let you know when something happens.</p>
+            <h2 className="text-base font-bold mt-3">এখনো কোনো নোটিফিকেশন নেই</h2>
+            <p className="text-xs text-neutral-500 mt-1">কিছু ঘটলে আমরা আপনাকে জানাব।</p>
           </div>
         ) : items.map((n) => {
           const Icon = typeIcon[n.type] || Bell;

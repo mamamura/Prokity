@@ -1,19 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../../lib/api';
 import { useToast } from '../../hooks/use-toast';
-import { Save, Smartphone, Wallet, Info, Globe, Truck, Building2, MessageCircle as MC } from 'lucide-react';
+import { Save, Smartphone, Wallet, Info, Globe, Truck, Building2, MessageCircle as MC, Percent, Tag } from 'lucide-react';
 
 const tabs = [
   { key: 'payment', label: 'Payment', icon: Wallet },
   { key: 'site', label: 'Site info', icon: Globe },
   { key: 'delivery', label: 'Delivery', icon: Truck },
+  { key: 'pricing', label: 'Pricing', icon: Percent },
 ];
 
 const AdminSettings = () => {
   const { toast } = useToast();
   const [tab, setTab] = useState('payment');
   const [p, setP] = useState({ bkashNumber: '', nagadNumber: '', bkashType: 'personal', nagadType: 'personal', instructions: '' });
-  const [s, setS] = useState({ siteName: '', tagline: '', contactPhone: '', contactEmail: '', contactAddress: '', facebookUrl: '', instagramUrl: '', whatsappNumber: '', deliveryFee: 60, freeDeliveryAbove: 500, aboutText: '' });
+  const [s, setS] = useState({ siteName: '', tagline: '', contactPhone: '', contactEmail: '', contactAddress: '', facebookUrl: '', instagramUrl: '', whatsappNumber: '', deliveryFee: 60, freeDeliveryAbove: 500, aboutText: '', globalDiscountPercent: 0, globalDiscountLabel: '', taxPercent: 0, minOrderAmount: 0 });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -188,6 +189,59 @@ const AdminSettings = () => {
           </div>
           <button data-testid="settings-delivery-save" disabled={saving} type="submit" className="w-full md:w-auto px-6 h-12 rounded-full bg-emerald-700 text-white font-semibold hover:bg-emerald-800 disabled:opacity-60 inline-flex items-center justify-center gap-2 transition-colors">
             <Save className="w-4 h-4" /> {saving ? 'Saving…' : 'Save delivery rules'}
+          </button>
+        </form>
+      )}
+      {tab === 'pricing' && (
+        <form onSubmit={saveSite} className="max-w-2xl space-y-4">
+          <div className="rounded-2xl bg-white border border-neutral-100 p-4 md:p-5">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-9 h-9 rounded-lg bg-rose-600 grid place-items-center"><Percent className="w-4 h-4 text-white" /></div>
+              <div>
+                <div className="font-extrabold text-sm">Global discount</div>
+                <div className="text-[10.5px] text-neutral-500">Applies to every cart's subtotal — great for sitewide promotions.</div>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div>
+                <label className="text-[10.5px] uppercase tracking-wider font-semibold text-neutral-600">Discount %</label>
+                <input data-testid="settings-globalDiscountPercent" type="number" step="0.1" min="0" max="90" value={s.globalDiscountPercent} onChange={(e) => setS({ ...s, globalDiscountPercent: parseFloat(e.target.value) || 0 })} className="mt-1 w-full h-11 px-3 rounded-xl bg-neutral-50 border border-neutral-200 outline-none focus:border-emerald-500 text-sm" />
+                <div className="text-[10.5px] text-neutral-500 mt-1">0 মানে ডিসকাউন্ট বন্ধ</div>
+              </div>
+              <div className="md:col-span-2">
+                <label className="text-[10.5px] uppercase tracking-wider font-semibold text-neutral-600">Promo label</label>
+                <div className="relative mt-1">
+                  <Tag className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-neutral-400" />
+                  <input data-testid="settings-globalDiscountLabel" value={s.globalDiscountLabel} onChange={(e) => setS({ ...s, globalDiscountLabel: e.target.value })} placeholder="e.g. ঈদ ডিসকাউন্ট, Winter Sale" className="w-full h-11 pl-8 pr-3 rounded-xl bg-neutral-50 border border-neutral-200 outline-none focus:border-emerald-500 text-sm" />
+                </div>
+                <div className="text-[10.5px] text-neutral-500 mt-1">কার্ট ও চেকআউটে এই লেবেলটি দেখা যাবে</div>
+              </div>
+            </div>
+          </div>
+
+          <div className="rounded-2xl bg-white border border-neutral-100 p-4 md:p-5">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-9 h-9 rounded-lg bg-indigo-600 grid place-items-center"><Percent className="w-4 h-4 text-white" /></div>
+              <div>
+                <div className="font-extrabold text-sm">VAT / Tax</div>
+                <div className="text-[10.5px] text-neutral-500">Optional. Applied on (subtotal − discount).</div>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div>
+                <label className="text-[10.5px] uppercase tracking-wider font-semibold text-neutral-600">VAT / Tax %</label>
+                <input data-testid="settings-taxPercent" type="number" step="0.1" min="0" max="50" value={s.taxPercent} onChange={(e) => setS({ ...s, taxPercent: parseFloat(e.target.value) || 0 })} className="mt-1 w-full h-11 px-3 rounded-xl bg-neutral-50 border border-neutral-200 outline-none focus:border-emerald-500 text-sm" />
+              </div>
+              <div>
+                <label className="text-[10.5px] uppercase tracking-wider font-semibold text-neutral-600">Minimum order (৳)</label>
+                <input data-testid="settings-minOrderAmount" type="number" step="1" min="0" value={s.minOrderAmount} onChange={(e) => setS({ ...s, minOrderAmount: parseFloat(e.target.value) || 0 })} className="mt-1 w-full h-11 px-3 rounded-xl bg-neutral-50 border border-neutral-200 outline-none focus:border-emerald-500 text-sm" />
+                <div className="text-[10.5px] text-neutral-500 mt-1">0 মানে কোনো সীমা নেই</div>
+              </div>
+            </div>
+          </div>
+
+          <button data-testid="settings-pricing-save" disabled={saving} type="submit" className="w-full md:w-auto px-6 h-12 rounded-full bg-emerald-700 text-white font-semibold hover:bg-emerald-800 disabled:opacity-60 inline-flex items-center justify-center gap-2 transition-colors">
+            <Save className="w-4 h-4" /> {saving ? 'Saving…' : 'Save pricing'}
           </button>
         </form>
       )}

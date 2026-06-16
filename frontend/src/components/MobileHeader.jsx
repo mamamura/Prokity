@@ -50,8 +50,8 @@ const MobileHeader = ({ title, back = false, hideSearch = false }) => {
             {user?.avatar ? <img src={user.avatar} alt="" className="w-full h-full object-cover" /> : (user ? user.name.charAt(0).toUpperCase() : <User className="w-4 h-4" />)}
           </div>
           <div className="leading-tight text-left min-w-0">
-            <div className="text-[10.5px] opacity-80">{user ? 'Welcome back' : 'Tap to'}</div>
-            <div className={`font-semibold truncate transition-all ${compact ? 'text-[12px] max-w-[120px]' : 'text-[13px] max-w-[160px]'}`}>{user ? user.name : 'Sign in'}</div>
+            <div className="text-[10.5px] opacity-80">{user ? 'স্বাগতম' : 'লগইন করতে'}</div>
+            <div className={`font-semibold truncate transition-all ${compact ? 'text-[12px] max-w-[120px]' : 'text-[13px] max-w-[160px]'}`}>{user ? user.name : 'ট্যাপ করুন'}</div>
           </div>
         </Link>
 
@@ -83,7 +83,7 @@ const MobileHeader = ({ title, back = false, hideSearch = false }) => {
         className={`w-full rounded-full bg-white text-neutral-500 px-4 flex items-center gap-2 text-sm overflow-hidden transition-all duration-200 ease-out ${compact ? 'h-0 mt-0 opacity-0 pointer-events-none' : 'h-11 mt-3 opacity-100'}`}
       >
         <Search className="w-4 h-4" />
-        <span>Search honey, oil, spices…</span>
+        <span>মধু, তেল, মসলা খুঁজুন…</span>
       </button>
     </div>
   );

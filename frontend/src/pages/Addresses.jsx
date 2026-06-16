@@ -28,37 +28,38 @@ const AddressForm = ({ value, onChange, onSubmit, onCancel, saving }) => (
       {['Home', 'Office', 'Other'].map((l) => {
         const Icon = LABEL_ICONS[l];
         const active = value.label === l;
+        const labelBn = l === 'Home' ? 'বাসা' : l === 'Office' ? 'অফিস' : 'অন্যান্য';
         return (
           <button key={l} type="button" data-testid={`addr-label-${l.toLowerCase()}`} onClick={() => onChange({ ...value, label: l })}
             className={`inline-flex items-center gap-1.5 px-3 h-9 rounded-full border text-[12.5px] font-semibold transition-colors ${active ? 'bg-emerald-700 text-white border-emerald-700' : 'bg-white text-neutral-700 border-neutral-200 hover:border-emerald-400'}`}>
-            <Icon className="w-3.5 h-3.5" /> {l}
+            <Icon className="w-3.5 h-3.5" /> {labelBn}
           </button>
         );
       })}
     </div>
     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-      <input data-testid="addr-fullName" required value={value.fullName} onChange={(e) => onChange({ ...value, fullName: e.target.value })} placeholder="Full name *" className="h-11 px-4 rounded-xl bg-neutral-50 border border-neutral-200 outline-none focus:border-emerald-500 text-sm" />
-      <input data-testid="addr-phone" required value={value.phone} onChange={(e) => onChange({ ...value, phone: e.target.value })} placeholder="Mobile number *" inputMode="tel" className="h-11 px-4 rounded-xl bg-neutral-50 border border-neutral-200 outline-none focus:border-emerald-500 text-sm" />
+      <input data-testid="addr-fullName" required value={value.fullName} onChange={(e) => onChange({ ...value, fullName: e.target.value })} placeholder="পূর্ণ নাম *" className="h-11 px-4 rounded-xl bg-neutral-50 border border-neutral-200 outline-none focus:border-emerald-500 text-sm" />
+      <input data-testid="addr-phone" required value={value.phone} onChange={(e) => onChange({ ...value, phone: e.target.value })} placeholder="মোবাইল নম্বর *" inputMode="tel" className="h-11 px-4 rounded-xl bg-neutral-50 border border-neutral-200 outline-none focus:border-emerald-500 text-sm" />
     </div>
-    <textarea data-testid="addr-address" required value={value.address} onChange={(e) => onChange({ ...value, address: e.target.value })} rows={2} placeholder="House / Road / Building *" className="w-full px-4 py-2.5 rounded-xl bg-neutral-50 border border-neutral-200 outline-none focus:border-emerald-500 text-sm resize-none" />
+    <textarea data-testid="addr-address" required value={value.address} onChange={(e) => onChange({ ...value, address: e.target.value })} rows={2} placeholder="বাসা / রোড / বিল্ডিং *" className="w-full px-4 py-2.5 rounded-xl bg-neutral-50 border border-neutral-200 outline-none focus:border-emerald-500 text-sm resize-none" />
     <div className="grid grid-cols-2 gap-3">
-      <input data-testid="addr-area" required value={value.area} onChange={(e) => onChange({ ...value, area: e.target.value })} placeholder="Area / Thana / Upazila *" className="h-11 px-4 rounded-xl bg-neutral-50 border border-neutral-200 outline-none focus:border-emerald-500 text-sm" />
-      <input data-testid="addr-city" value={value.city} onChange={(e) => onChange({ ...value, city: e.target.value })} placeholder="City" className="h-11 px-4 rounded-xl bg-neutral-50 border border-neutral-200 outline-none focus:border-emerald-500 text-sm" />
+      <input data-testid="addr-area" required value={value.area} onChange={(e) => onChange({ ...value, area: e.target.value })} placeholder="এলাকা / থানা *" className="h-11 px-4 rounded-xl bg-neutral-50 border border-neutral-200 outline-none focus:border-emerald-500 text-sm" />
+      <input data-testid="addr-city" value={value.city} onChange={(e) => onChange({ ...value, city: e.target.value })} placeholder="শহর" className="h-11 px-4 rounded-xl bg-neutral-50 border border-neutral-200 outline-none focus:border-emerald-500 text-sm" />
     </div>
     <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-      <input data-testid="addr-district" value={value.district || ''} onChange={(e) => onChange({ ...value, district: e.target.value })} placeholder="District" className="h-11 px-4 rounded-xl bg-neutral-50 border border-neutral-200 outline-none focus:border-emerald-500 text-sm" />
-      <input data-testid="addr-division" value={value.division || ''} onChange={(e) => onChange({ ...value, division: e.target.value })} placeholder="Division" className="h-11 px-4 rounded-xl bg-neutral-50 border border-neutral-200 outline-none focus:border-emerald-500 text-sm" />
-      <input data-testid="addr-postal" value={value.postalCode || ''} onChange={(e) => onChange({ ...value, postalCode: e.target.value })} placeholder="Postal code" className="h-11 px-4 rounded-xl bg-neutral-50 border border-neutral-200 outline-none focus:border-emerald-500 text-sm" />
+      <input data-testid="addr-district" value={value.district || ''} onChange={(e) => onChange({ ...value, district: e.target.value })} placeholder="জেলা" className="h-11 px-4 rounded-xl bg-neutral-50 border border-neutral-200 outline-none focus:border-emerald-500 text-sm" />
+      <input data-testid="addr-division" value={value.division || ''} onChange={(e) => onChange({ ...value, division: e.target.value })} placeholder="বিভাগ" className="h-11 px-4 rounded-xl bg-neutral-50 border border-neutral-200 outline-none focus:border-emerald-500 text-sm" />
+      <input data-testid="addr-postal" value={value.postalCode || ''} onChange={(e) => onChange({ ...value, postalCode: e.target.value })} placeholder="পোস্টাল কোড" className="h-11 px-4 rounded-xl bg-neutral-50 border border-neutral-200 outline-none focus:border-emerald-500 text-sm" />
     </div>
-    <textarea data-testid="addr-note" value={value.note || ''} onChange={(e) => onChange({ ...value, note: e.target.value })} rows={2} placeholder="Note for rider (optional)" className="w-full px-4 py-2.5 rounded-xl bg-neutral-50 border border-neutral-200 outline-none focus:border-emerald-500 text-sm resize-none" />
+    <textarea data-testid="addr-note" value={value.note || ''} onChange={(e) => onChange({ ...value, note: e.target.value })} rows={2} placeholder="রাইডারের জন্য নোট (ঐচ্ছিক)" className="w-full px-4 py-2.5 rounded-xl bg-neutral-50 border border-neutral-200 outline-none focus:border-emerald-500 text-sm resize-none" />
     <label className="flex items-center gap-2 text-sm cursor-pointer select-none">
       <input data-testid="addr-default" type="checkbox" checked={!!value.isDefault} onChange={(e) => onChange({ ...value, isDefault: e.target.checked })} className="w-4 h-4 accent-emerald-600" />
-      Set as default address
+      ডিফল্ট ঠিকানা হিসেবে সেট করুন
     </label>
     <div className="flex gap-2 pt-1">
-      <button type="button" onClick={onCancel} className="flex-1 h-12 rounded-full bg-neutral-100 text-neutral-700 font-semibold hover:bg-neutral-200 transition-colors">Cancel</button>
+      <button type="button" onClick={onCancel} className="flex-1 h-12 rounded-full bg-neutral-100 text-neutral-700 font-semibold hover:bg-neutral-200 transition-colors">বাতিল</button>
       <button data-testid="addr-save-btn" disabled={saving} type="submit" className="flex-1 h-12 rounded-full bg-emerald-700 text-white font-semibold hover:bg-emerald-800 disabled:opacity-60 inline-flex items-center justify-center gap-2 transition-colors">
-        <Save className="w-4 h-4" /> {saving ? 'Saving…' : 'Save address'}
+        <Save className="w-4 h-4" /> {saving ? 'সেভ হচ্ছে…' : 'ঠিকানা সেভ করুন'}
       </button>
     </div>
   </form>
@@ -91,38 +92,38 @@ const Addresses = () => {
   const save = async (e) => {
     e.preventDefault();
     if (!form.fullName || !form.phone || !form.address || !form.area) {
-      toast({ title: 'Please fill required fields', variant: 'destructive' }); return;
+      toast({ title: 'অনুগ্রহ করে আবশ্যক ঘর পূরণ করুন', variant: 'destructive' }); return;
     }
     setSaving(true);
     try {
-      if (editing) { await api.put(`/auth/me/addresses/${editing.id}`, form); toast({ title: 'Address updated' }); }
-      else { await api.post('/auth/me/addresses', form); toast({ title: 'Address added' }); }
+      if (editing) { await api.put(`/auth/me/addresses/${editing.id}`, form); toast({ title: 'ঠিকানা আপডেট হয়েছে' }); }
+      else { await api.post('/auth/me/addresses', form); toast({ title: 'ঠিকানা যোগ হয়েছে' }); }
       await load(); close();
     } catch (e) {
-      toast({ title: 'Save failed', description: e.response?.data?.detail || 'Try again', variant: 'destructive' });
+      toast({ title: 'সেভ ব্যর্থ', description: e.response?.data?.detail || 'আবার চেষ্টা করুন', variant: 'destructive' });
     } finally { setSaving(false); }
   };
 
   const remove = async (a) => {
-    if (!window.confirm('Delete this address?')) return;
-    try { await api.delete(`/auth/me/addresses/${a.id}`); toast({ title: 'Address deleted' }); await load(); }
-    catch (e) { toast({ title: 'Delete failed', variant: 'destructive' }); }
+    if (!window.confirm('এই ঠিকানা মুছবেন?')) return;
+    try { await api.delete(`/auth/me/addresses/${a.id}`); toast({ title: 'ঠিকানা মুছে ফেলা হয়েছে' }); await load(); }
+    catch (e) { toast({ title: 'মুছতে ব্যর্থ', variant: 'destructive' }); }
   };
 
   const setDefault = async (a) => {
     try { await api.put(`/auth/me/addresses/${a.id}`, { isDefault: true }); await load(); }
-    catch (e) { toast({ title: 'Update failed', variant: 'destructive' }); }
+    catch (e) { toast({ title: 'আপডেট ব্যর্থ', variant: 'destructive' }); }
   };
 
   if (!user) return null;
 
   return (
     <div className="pb-24 lg:pb-12 max-w-2xl mx-auto lg:px-6">
-      <MobileHeader title="Address book" back hideSearch />
+      <MobileHeader title="ঠিকানা" back hideSearch />
       <div className="hidden lg:flex items-end justify-between mt-6 mb-2">
-        <h1 className="text-3xl font-extrabold">Address book</h1>
+        <h1 className="text-3xl font-extrabold">ঠিকানা</h1>
         <button data-testid="addr-add-btn" onClick={openAdd} className="inline-flex items-center gap-2 bg-emerald-700 text-white h-11 px-5 rounded-full text-sm font-semibold hover:bg-emerald-800 transition-colors">
-          <Plus className="w-4 h-4" /> Add new
+          <Plus className="w-4 h-4" /> নতুন যোগ
         </button>
       </div>
 
@@ -132,10 +133,10 @@ const Addresses = () => {
         ) : items.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-emerald-200 bg-emerald-50/40 p-8 text-center">
             <MapPin className="w-7 h-7 text-emerald-600 mx-auto" />
-            <div className="text-[14px] font-semibold mt-2">No saved addresses</div>
-            <div className="text-[12px] text-neutral-500 mt-1">Add an address once and reuse it during checkout.</div>
+            <div className="text-[14px] font-semibold mt-2">কোনো সংরক্ষিত ঠিকানা নেই</div>
+            <div className="text-[12px] text-neutral-500 mt-1">একবার ঠিকানা যোগ করে চেকআউটে পুনরায় ব্যবহার করুন।</div>
             <button data-testid="addr-add-btn-empty" onClick={openAdd} className="mt-4 inline-flex items-center gap-1.5 bg-emerald-700 text-white h-10 px-5 rounded-full text-[13px] font-semibold hover:bg-emerald-800 transition-colors">
-              <Plus className="w-4 h-4" /> Add address
+              <Plus className="w-4 h-4" /> ঠিকানা যোগ করুন
             </button>
           </div>
         ) : (
@@ -163,17 +164,17 @@ const Addresses = () => {
                   <div className="text-[13px] text-neutral-700 mt-2.5 leading-relaxed">
                     {a.address}, {a.area}{a.city ? `, ${a.city}` : ''}{a.district ? `, ${a.district}` : ''}{a.postalCode ? ` — ${a.postalCode}` : ''}
                   </div>
-                  {a.note && <div className="text-[11.5px] text-neutral-500 mt-1.5">Note: {a.note}</div>}
+                  {a.note && <div className="text-[11.5px] text-neutral-500 mt-1.5">নোট: {a.note}</div>}
                   {!a.isDefault && (
                     <button data-testid={`addr-makedefault-${a.id}`} onClick={() => setDefault(a)} className="mt-2.5 text-[12px] font-semibold text-emerald-700 inline-flex items-center gap-1 hover:text-emerald-800 transition-colors">
-                      <Star className="w-3.5 h-3.5" /> Set as default
+                      <Star className="w-3.5 h-3.5" /> ডিফল্ট হিসেবে সেট করুন
                     </button>
                   )}
                 </div>
               );
             })}
             <button data-testid="addr-add-btn-bottom" onClick={openAdd} className="w-full lg:hidden mt-2 h-12 rounded-full bg-emerald-700 text-white font-semibold hover:bg-emerald-800 inline-flex items-center justify-center gap-2 transition-colors">
-              <Plus className="w-4 h-4" /> Add new address
+              <Plus className="w-4 h-4" /> নতুন ঠিকানা যোগ করুন
             </button>
           </>
         )}
@@ -185,7 +186,7 @@ const Addresses = () => {
           <div className="absolute inset-0 bg-black/40" onClick={close} />
           <div className="relative w-full md:max-w-lg bg-white md:rounded-3xl rounded-t-3xl shadow-2xl max-h-[92vh] overflow-y-auto animate-in slide-in-from-bottom-4 duration-200">
             <div className="sticky top-0 bg-white flex items-center justify-between px-4 py-3 border-b border-neutral-100">
-              <div className="font-extrabold text-base">{editing ? 'Edit address' : 'New address'}</div>
+              <div className="font-extrabold text-base">{editing ? 'ঠিকানা এডিট' : 'নতুন ঠিকানা'}</div>
               <button data-testid="addr-form-close" onClick={close} className="w-9 h-9 grid place-items-center rounded-full hover:bg-neutral-100"><X className="w-5 h-5" /></button>
             </div>
             <div className="p-4">
@@ -196,7 +197,7 @@ const Addresses = () => {
       )}
 
       <div className="hidden lg:block px-4 mt-6">
-        <Link to="/profile" className="text-[12px] text-neutral-500 hover:text-neutral-700">← Back to profile</Link>
+        <Link to="/profile" className="text-[12px] text-neutral-500 hover:text-neutral-700">← প্রোফাইলে ফিরুন</Link>
       </div>
     </div>
   );

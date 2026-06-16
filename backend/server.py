@@ -227,6 +227,11 @@ class SiteSettings(BaseModel):
     deliveryFee: Optional[float] = 60
     freeDeliveryAbove: Optional[float] = 500
     aboutText: Optional[str] = ''
+    # Pricing controls (admin-managed)
+    globalDiscountPercent: Optional[float] = 0   # blanket % off applied to cart subtotal
+    globalDiscountLabel: Optional[str] = ''       # marketing label e.g. "ঈদ ডিসকাউন্ট"
+    taxPercent: Optional[float] = 0               # VAT/Tax % applied on (subtotal − discount)
+    minOrderAmount: Optional[float] = 0           # minimum order to checkout
 
 
 class BannerUpsert(BaseModel):
@@ -294,6 +299,18 @@ async def get_current_user(creds: Optional[HTTPAuthorizationCredentials] = Depen
         return user
     except JWTError:
         raise HTTPException(401, 'Invalid token')
+
+async def get_optional_user(creds: Optional[HTTPAuthorizationCredentials] = Depends(bearer)):
+    """Returns user dict if a valid token is present, otherwise None.
+    Used to support guest checkout while still personalizing for logged-in users."""
+    if not creds:
+        return None
+    try:
+        payload = jwt.decode(creds.credentials, SECRET_KEY, algorithms=[ALGO])
+        user = await db.users.find_one({'id': payload['sub']})
+        return user  # could be None if user not found
+    except JWTError:
+        return None
 
 async def get_admin(user = Depends(get_current_user)):
     if user.get('role') != 'admin':
@@ -540,6 +557,7 @@ SITE_DEFAULTS = {
     'contactPhone': '', 'contactEmail': '', 'contactAddress': '',
     'facebookUrl': '', 'instagramUrl': '', 'whatsappNumber': '',
     'deliveryFee': 60, 'freeDeliveryAbove': 500, 'aboutText': '',
+    'globalDiscountPercent': 0, 'globalDiscountLabel': '', 'taxPercent': 0, 'minOrderAmount': 0,
 }
 
 @api.get('/settings/site')
@@ -959,17 +977,30 @@ async def payment_verify(body: PaymentVerify):
 
 # Orders
 @api.post('/orders')
-async def create_order(body: OrderCreate, user = Depends(get_current_user)):
+async def create_order(body: OrderCreate, user = Depends(get_optional_user)):
     # For bKash/Nagad — payment is verified manually by admin; require txn id
     if body.paymentMethod in ('bkash', 'nagad'):
         if not body.paymentPhone or not body.paymentTxn:
             raise HTTPException(400, 'Sender phone and transaction ID required for bKash/Nagad')
+    is_guest = user is None
+    # For guest orders, derive name/phone from the delivery address payload
+    if is_guest:
+        if not body.address.fullName or not body.address.phone:
+            raise HTTPException(400, 'Full name and phone are required for guest checkout')
+        user_id = None
+        user_name = body.address.fullName
+        user_phone = body.address.phone
+    else:
+        user_id = user['id']
+        user_name = user['name']
+        user_phone = user['phone']
     order = {
         'id': str(uuid.uuid4()),
         'orderNo': f"ORD-{datetime.utcnow().strftime('%y%m%d')}-{random.randint(1000, 9999)}",
-        'userId': user['id'],
-        'userName': user['name'],
-        'userPhone': user['phone'],
+        'userId': user_id,
+        'userName': user_name,
+        'userPhone': user_phone,
+        'guest': is_guest,
         'items': [i.model_dump() for i in body.items],
         'address': body.address.model_dump(),
         'paymentMethod': body.paymentMethod,
@@ -999,7 +1030,9 @@ async def create_order(body: OrderCreate, user = Depends(get_current_user)):
         msg = f"আপনার অর্ডার ৳{order['total']:.0f} গ্রহণ করা হয়েছে। ডেলিভারির সময় ক্যাশ পেমেন্ট করুন।"
     else:
         msg = f"আপনার অর্ডার ৳{order['total']:.0f} গ্রহণ করা হয়েছে। পেমেন্ট ভেরিফিকেশন বাকি — আমরা শীঘ্রই কনফার্ম করব।"
-    await push_notification(user['id'], f"অর্ডার গৃহীত · {order['orderNo']}", msg, 'order', order['id'])
+    # Only push notification for logged-in users (guest has no account to receive notifications)
+    if not is_guest:
+        await push_notification(user_id, f"অর্ডার গৃহীত · {order['orderNo']}", msg, 'order', order['id'])
     order.pop('_id', None)
     return order
 
@@ -1008,6 +1041,26 @@ async def my_orders(user = Depends(get_current_user)):
     orders = await db.orders.find({'userId': user['id']}).sort('createdAt', -1).to_list(200)
     for o in orders: o.pop('_id', None)
     return orders
+
+# Public order tracking — guest customers can look up by order number + phone (no auth)
+@api.get('/orders/track/{order_no}')
+async def track_order_public(order_no: str, phone: str):
+    if not phone or len(phone.strip()) < 4:
+        raise HTTPException(400, 'Phone is required to track an order')
+    p = phone.strip()
+    # Match either delivery-address phone or stored userPhone (last 6 digits compare to be lenient)
+    o = await db.orders.find_one({'orderNo': order_no.strip()})
+    if not o:
+        raise HTTPException(404, 'Order not found')
+    addr_phone = (o.get('address', {}) or {}).get('phone', '') or ''
+    user_phone = o.get('userPhone', '') or ''
+    def _norm(x: str) -> str:
+        return ''.join(c for c in (x or '') if c.isdigit())
+    np = _norm(p)
+    if not np or (_norm(addr_phone)[-6:] != np[-6:] and _norm(user_phone)[-6:] != np[-6:]):
+        raise HTTPException(403, 'Phone does not match this order')
+    o.pop('_id', None)
+    return o
 
 @api.get('/orders/{order_id}')
 async def get_order(order_id: str, user = Depends(get_current_user)):

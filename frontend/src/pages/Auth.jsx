@@ -20,10 +20,10 @@ export const Login = () => {
     setLoading(true);
     try {
       const u = await login(email, password);
-      toast({ title: `Welcome back, ${u.name.split(' ')[0]}!` });
+      toast({ title: `স্বাগতম, ${u.name.split(' ')[0]}!` });
       nav(next);
     } catch (e) {
-      toast({ title: 'Login failed', description: e.response?.data?.detail || 'Check your credentials', variant: 'destructive' });
+      toast({ title: 'লগইন ব্যর্থ', description: e.response?.data?.detail || 'ইমেইল ও পাসওয়ার্ড চেক করুন', variant: 'destructive' });
     } finally { setLoading(false); }
   };
 
@@ -32,18 +32,19 @@ export const Login = () => {
       <div className="text-center mb-8">
         <div className="w-14 h-14 mx-auto rounded-2xl bg-emerald-700 grid place-items-center"><Leaf className="w-7 h-7 text-white" /></div>
         <h1 className="text-2xl font-extrabold mt-3" style={{ fontFamily: "'Hind Siliguri', 'Noto Sans Bengali', Inter, sans-serif" }}>প্রকৃতির ঘ্রাণ</h1>
-        <p className="text-sm text-neutral-500 mt-1">Sign in to continue shopping organic.</p>
+        <p className="text-sm text-neutral-500 mt-1">অর্গানিক কেনাকাটা চালিয়ে যেতে লগইন করুন।</p>
       </div>
       <form onSubmit={submit} className="space-y-3">
-        <input data-testid="login-email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" className="w-full h-12 px-4 rounded-xl bg-neutral-50 border border-neutral-200 outline-none focus:border-emerald-500 text-sm" />
+        <input data-testid="login-email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="ইমেইল" className="w-full h-12 px-4 rounded-xl bg-neutral-50 border border-neutral-200 outline-none focus:border-emerald-500 text-sm" />
         <div className="relative">
-          <input data-testid="login-password" type={show ? 'text' : 'password'} required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" className="w-full h-12 px-4 pr-11 rounded-xl bg-neutral-50 border border-neutral-200 outline-none focus:border-emerald-500 text-sm" />
+          <input data-testid="login-password" type={show ? 'text' : 'password'} required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="পাসওয়ার্ড" className="w-full h-12 px-4 pr-11 rounded-xl bg-neutral-50 border border-neutral-200 outline-none focus:border-emerald-500 text-sm" />
           <button type="button" onClick={() => setShow(!show)} className="absolute inset-y-0 right-3 grid place-items-center text-neutral-500">{show ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}</button>
         </div>
-        <button data-testid="login-submit" disabled={loading} type="submit" className="w-full h-12 rounded-full bg-emerald-700 text-white font-semibold hover:bg-emerald-800 disabled:opacity-60">{loading ? 'Signing in…' : 'Sign in'}</button>
+        <button data-testid="login-submit" disabled={loading} type="submit" className="w-full h-12 rounded-full bg-emerald-700 text-white font-semibold hover:bg-emerald-800 disabled:opacity-60">{loading ? 'লগইন হচ্ছে…' : 'লগইন'}</button>
       </form>
-      <div className="text-center mt-3"><Link to="/forgot-password" data-testid="login-forgot-link" className="text-[12.5px] text-emerald-700 font-semibold hover:text-emerald-800 transition-colors">Forgot password?</Link></div>
-      <div className="text-center mt-5 text-sm text-neutral-500">New here? <Link to="/signup" className="text-emerald-700 font-semibold">Create account</Link></div>
+      <div className="text-center mt-3"><Link to="/forgot-password" data-testid="login-forgot-link" className="text-[12.5px] text-emerald-700 font-semibold hover:text-emerald-800 transition-colors">পাসওয়ার্ড ভুলে গেছেন?</Link></div>
+      <div className="text-center mt-5 text-sm text-neutral-500">নতুন? <Link to="/signup" className="text-emerald-700 font-semibold">অ্যাকাউন্ট তৈরি করুন</Link></div>
+      <div className="text-center mt-3 text-[12px] text-neutral-500">অথবা <Link to="/" className="text-emerald-700 font-semibold">গেস্ট হিসেবে কেনাকাটা করুন</Link></div>
     </div>
   );
 };
@@ -60,10 +61,10 @@ export const Signup = () => {
     setLoading(true);
     try {
       await signup(form.name, form.email, form.phone, form.password);
-      toast({ title: 'Account created 🌱', description: 'Welcome to Sobuj!' });
+      toast({ title: 'অ্যাকাউন্ট তৈরি হয়েছে 🌱', description: 'প্রকৃতির ঘ্রাণে স্বাগতম!' });
       nav('/');
     } catch (e) {
-      toast({ title: 'Sign up failed', description: e.response?.data?.detail || 'Try again', variant: 'destructive' });
+      toast({ title: 'সাইনআপ ব্যর্থ', description: e.response?.data?.detail || 'আবার চেষ্টা করুন', variant: 'destructive' });
     } finally { setLoading(false); }
   };
 
@@ -72,16 +73,17 @@ export const Signup = () => {
       <div className="text-center mb-6">
         <div className="w-14 h-14 mx-auto rounded-2xl bg-emerald-700 grid place-items-center"><Leaf className="w-7 h-7 text-white" /></div>
         <h1 className="text-2xl font-extrabold mt-3" style={{ fontFamily: "'Hind Siliguri', 'Noto Sans Bengali', Inter, sans-serif" }}>প্রকৃতির ঘ্রাণ</h1>
-        <p className="text-sm text-neutral-500 mt-1">Create your account — pure organic, delivered.</p>
+        <p className="text-sm text-neutral-500 mt-1">আপনার অ্যাকাউন্ট তৈরি করুন — খাঁটি অর্গানিক, দরজায় পৌঁছে যাবে।</p>
       </div>
       <form onSubmit={submit} className="space-y-3">
-        <input data-testid="signup-name" required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Full name" className="w-full h-12 px-4 rounded-xl bg-neutral-50 border border-neutral-200 outline-none focus:border-emerald-500 text-sm" />
-        <input data-testid="signup-email" required type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="Email" className="w-full h-12 px-4 rounded-xl bg-neutral-50 border border-neutral-200 outline-none focus:border-emerald-500 text-sm" />
-        <input data-testid="signup-phone" required value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="Mobile number" inputMode="tel" className="w-full h-12 px-4 rounded-xl bg-neutral-50 border border-neutral-200 outline-none focus:border-emerald-500 text-sm" />
-        <input data-testid="signup-password" required type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} placeholder="Password (min 6 chars)" minLength={6} className="w-full h-12 px-4 rounded-xl bg-neutral-50 border border-neutral-200 outline-none focus:border-emerald-500 text-sm" />
-        <button data-testid="signup-submit" disabled={loading} type="submit" className="w-full h-12 rounded-full bg-emerald-700 text-white font-semibold hover:bg-emerald-800 disabled:opacity-60">{loading ? 'Creating…' : 'Create account'}</button>
+        <input data-testid="signup-name" required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="পূর্ণ নাম" className="w-full h-12 px-4 rounded-xl bg-neutral-50 border border-neutral-200 outline-none focus:border-emerald-500 text-sm" />
+        <input data-testid="signup-email" required type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="ইমেইল" className="w-full h-12 px-4 rounded-xl bg-neutral-50 border border-neutral-200 outline-none focus:border-emerald-500 text-sm" />
+        <input data-testid="signup-phone" required value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="মোবাইল নম্বর" inputMode="tel" className="w-full h-12 px-4 rounded-xl bg-neutral-50 border border-neutral-200 outline-none focus:border-emerald-500 text-sm" />
+        <input data-testid="signup-password" required type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} placeholder="পাসওয়ার্ড (ন্যূনতম ৬ অক্ষর)" minLength={6} className="w-full h-12 px-4 rounded-xl bg-neutral-50 border border-neutral-200 outline-none focus:border-emerald-500 text-sm" />
+        <button data-testid="signup-submit" disabled={loading} type="submit" className="w-full h-12 rounded-full bg-emerald-700 text-white font-semibold hover:bg-emerald-800 disabled:opacity-60">{loading ? 'তৈরি হচ্ছে…' : 'অ্যাকাউন্ট তৈরি করুন'}</button>
       </form>
-      <div className="text-center mt-5 text-sm text-neutral-500">Already have an account? <Link to="/login" className="text-emerald-700 font-semibold">Sign in</Link></div>
+      <div className="text-center mt-5 text-sm text-neutral-500">আগেই অ্যাকাউন্ট আছে? <Link to="/login" className="text-emerald-700 font-semibold">লগইন</Link></div>
+      <div className="text-center mt-3 text-[12px] text-neutral-500">অথবা <Link to="/" className="text-emerald-700 font-semibold">গেস্ট হিসেবে কেনাকাটা করুন</Link></div>
     </div>
   );
 };

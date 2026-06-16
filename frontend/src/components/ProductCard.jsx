@@ -22,14 +22,14 @@ const ProductCard = ({ product }) => {
     e.preventDefault(); e.stopPropagation();
     if (outOfStock) return;
     addToCart(product, 1);
-    toast({ title: 'Added to cart', description: product.name });
+    toast({ title: 'কার্টে যোগ হয়েছে', description: product.name });
   };
 
   const heart = async (e) => {
     e.preventDefault(); e.stopPropagation();
-    if (!user) { toast({ title: 'Sign in to save items', description: 'Your wishlist is tied to your account.' }); nav('/login?next=/wishlist'); return; }
+    if (!user) { toast({ title: 'সেভ করতে লগইন করুন', description: 'উইশলিস্ট আপনার অ্যাকাউন্টের সাথে যুক্ত।' }); nav('/login?next=/wishlist'); return; }
     const r = await toggle(product.id);
-    if (!r?.error) toast({ title: r?.inWishlist ? 'Saved to wishlist' : 'Removed from wishlist' });
+    if (!r?.error) toast({ title: r?.inWishlist ? 'উইশলিস্টে যোগ হয়েছে' : 'উইশলিস্ট থেকে সরানো হয়েছে' });
   };
 
   return (
@@ -50,7 +50,7 @@ const ProductCard = ({ product }) => {
         </button>
         {outOfStock && (
           <div className="absolute inset-0 grid place-items-center bg-white/70 backdrop-blur-[2px] z-[5]">
-            <span className="bg-neutral-900 text-white text-[11px] font-bold uppercase tracking-wider px-3 py-1 rounded-full">Out of stock</span>
+            <span className="bg-neutral-900 text-white text-[11px] font-bold uppercase tracking-wider px-3 py-1 rounded-full">স্টকে নেই</span>
           </div>
         )}
         <img
@@ -71,7 +71,7 @@ const ProductCard = ({ product }) => {
             </span>
           )}
         </div>
-        {lowStock && <div className="text-[10.5px] text-amber-600 font-semibold">Only {product.stock} left</div>}
+        {lowStock && <div className="text-[10.5px] text-amber-600 font-semibold">মাত্র {product.stock}টি বাকি</div>}
         <div className="flex items-end justify-between pt-1">
           <div className="flex flex-col">
             <div className="flex items-baseline gap-1.5">

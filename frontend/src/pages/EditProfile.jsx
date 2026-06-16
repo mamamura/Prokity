@@ -17,7 +17,7 @@ const EditProfile = () => {
 
   const onFile = (e) => {
     const file = e.target.files?.[0]; if (!file) return;
-    if (file.size > 2 * 1024 * 1024) { toast({ title: 'Image too large (max 2 MB)', variant: 'destructive' }); return; }
+    if (file.size > 2 * 1024 * 1024) { toast({ title: 'ছবি অনেক বড় (সর্বোচ্চ ২ MB)', variant: 'destructive' }); return; }
     const reader = new FileReader();
     reader.onload = () => setF((s) => ({ ...s, avatar: reader.result }));
     reader.readAsDataURL(file);
@@ -25,22 +25,22 @@ const EditProfile = () => {
 
   const submit = async (e) => {
     e.preventDefault();
-    if (!f.name.trim() || !f.phone.trim()) { toast({ title: 'Name and phone required', variant: 'destructive' }); return; }
+    if (!f.name.trim() || !f.phone.trim()) { toast({ title: 'নাম ও মোবাইল প্রয়োজন', variant: 'destructive' }); return; }
     setSaving(true);
     try {
       await updateProfile({ name: f.name.trim(), phone: f.phone.trim(), avatar: f.avatar || null });
-      toast({ title: 'Profile updated' });
+      toast({ title: 'প্রোফাইল আপডেট হয়েছে' });
       nav('/profile');
     } catch (e) {
-      toast({ title: 'Save failed', description: e.response?.data?.detail || 'Try again', variant: 'destructive' });
+      toast({ title: 'সেভ ব্যর্থ', description: e.response?.data?.detail || 'আবার চেষ্টা করুন', variant: 'destructive' });
     } finally { setSaving(false); }
   };
 
   return (
     <div className="pb-8 max-w-2xl mx-auto lg:px-6">
-      <MobileHeader title="Edit profile" back hideSearch />
+      <MobileHeader title="প্রোফাইল এডিট" back hideSearch />
       <div className="hidden lg:block mt-6 mb-2">
-        <h1 className="text-3xl font-extrabold">Edit profile</h1>
+        <h1 className="text-3xl font-extrabold">প্রোফাইল এডিট</h1>
       </div>
       <form onSubmit={submit} className="px-4 mt-4 space-y-4">
         <div className="flex items-center gap-4">
@@ -54,28 +54,28 @@ const EditProfile = () => {
             <input ref={fileRef} type="file" accept="image/*" onChange={onFile} className="hidden" />
           </div>
           <div className="flex-1">
-            <div className="text-[13px] font-semibold">Profile photo</div>
-            <div className="text-[11.5px] text-neutral-500 mt-0.5">PNG/JPG, up to 2 MB.</div>
-            {f.avatar && (<button type="button" onClick={() => setF((s) => ({ ...s, avatar: '' }))} className="mt-1.5 text-[11px] text-red-600 font-semibold">Remove photo</button>)}
+            <div className="text-[13px] font-semibold">প্রোফাইল ছবি</div>
+            <div className="text-[11.5px] text-neutral-500 mt-0.5">PNG/JPG, সর্বোচ্চ ২ MB।</div>
+            {f.avatar && (<button type="button" onClick={() => setF((s) => ({ ...s, avatar: '' }))} className="mt-1.5 text-[11px] text-red-600 font-semibold">ছবি সরান</button>)}
           </div>
         </div>
 
         <div>
-          <label className="text-[11px] font-semibold text-neutral-700 uppercase">Name</label>
+          <label className="text-[11px] font-semibold text-neutral-700 uppercase">নাম</label>
           <input value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} className="mt-1 w-full h-12 px-4 rounded-xl bg-neutral-50 border border-neutral-200 outline-none focus:border-emerald-500 text-sm" />
         </div>
         <div>
-          <label className="text-[11px] font-semibold text-neutral-700 uppercase">Phone</label>
+          <label className="text-[11px] font-semibold text-neutral-700 uppercase">মোবাইল</label>
           <input value={f.phone} onChange={(e) => setF({ ...f, phone: e.target.value })} inputMode="tel" className="mt-1 w-full h-12 px-4 rounded-xl bg-neutral-50 border border-neutral-200 outline-none focus:border-emerald-500 text-sm" />
         </div>
         <div>
-          <label className="text-[11px] font-semibold text-neutral-700 uppercase">Email</label>
+          <label className="text-[11px] font-semibold text-neutral-700 uppercase">ইমেইল</label>
           <input value={user.email} disabled className="mt-1 w-full h-12 px-4 rounded-xl bg-neutral-100 text-neutral-500 border border-neutral-200 text-sm" />
-          <div className="text-[10.5px] text-neutral-400 mt-1">Email cannot be changed.</div>
+          <div className="text-[10.5px] text-neutral-400 mt-1">ইমেইল পরিবর্তন করা যাবে না।</div>
         </div>
 
         <button disabled={saving} type="submit" className="w-full h-12 rounded-full bg-emerald-700 text-white font-semibold hover:bg-emerald-800 disabled:opacity-60 inline-flex items-center justify-center gap-2">
-          <Save className="w-4 h-4" /> {saving ? 'Saving…' : 'Save changes'}
+          <Save className="w-4 h-4" /> {saving ? 'সেভ হচ্ছে…' : 'পরিবর্তন সেভ করুন'}
         </button>
       </form>
     </div>

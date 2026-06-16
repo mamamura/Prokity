@@ -72,7 +72,7 @@ const ProductPage = () => {
   const heart = async () => {
     if (!user) { nav('/login?next=/product/' + slug); return; }
     const r = await toggle(p.id);
-    if (!r?.error) toast({ title: r?.inWishlist ? 'Saved to wishlist' : 'Removed from wishlist' });
+    if (!r?.error) toast({ title: r?.inWishlist ? 'উইশলিস্টে যোগ হয়েছে' : 'উইশলিস্ট থেকে সরানো হয়েছে' });
   };
   const share = async () => {
     const url = window.location.href;
@@ -87,7 +87,7 @@ const ProductPage = () => {
       <MobileHeader title=" " back />
       <div className="max-w-7xl mx-auto lg:px-6 lg:py-8 lg:grid lg:grid-cols-2 lg:gap-10">
         <div className="relative aspect-square bg-neutral-50 lg:rounded-3xl lg:overflow-hidden">
-          {outOfStock && (<div className="absolute inset-0 grid place-items-center bg-white/70 backdrop-blur-[2px] z-10"><span className="bg-neutral-900 text-white text-[12px] font-bold uppercase tracking-wider px-4 py-1.5 rounded-full">Out of stock</span></div>)}
+          {outOfStock && (<div className="absolute inset-0 grid place-items-center bg-white/70 backdrop-blur-[2px] z-10"><span className="bg-neutral-900 text-white text-[12px] font-bold uppercase tracking-wider px-4 py-1.5 rounded-full">স্টকে নেই</span></div>)}
           <img src={p.image} alt={p.name} onError={(e) => { e.currentTarget.src = `https://placehold.co/600/f5f5f5/525252?text=${encodeURIComponent(p.name.slice(0,16))}`; }} className="w-full h-full object-cover" />
           <div className="absolute top-3 right-3 flex items-center gap-1.5">
             <button onClick={share} aria-label="Share" data-testid="product-share-btn" className="w-9 h-9 grid place-items-center rounded-full bg-white/85 backdrop-blur shadow-sm hover:bg-white transition-colors text-neutral-700"><Share2 className="w-4 h-4" /></button>
@@ -125,9 +125,9 @@ const ProductPage = () => {
 
           <div className="mt-5 grid grid-cols-3 gap-2 lg:gap-3">
             {[
-              { i: Truck, t: 'Free delivery', s: 'Over ৳500' },
-              { i: ShieldCheck, t: 'Quality', s: '100% organic' },
-              { i: RotateCcw, t: 'Easy return', s: '24 hrs' },
+              { i: Truck, t: 'ফ্রি ডেলিভারি', s: '৳৫০০ এর উপরে' },
+              { i: ShieldCheck, t: 'মান নিশ্চয়তা', s: '১০০% অর্গানিক' },
+              { i: RotateCcw, t: 'সহজ রিটার্ন', s: '২৪ ঘণ্টায়' },
             ].map((f, i) => (
               <div key={i} className="rounded-xl bg-neutral-50 p-2.5 lg:p-3.5 text-center">
                 <f.i className="w-4 h-4 lg:w-5 lg:h-5 text-emerald-600 mx-auto" />
@@ -149,9 +149,9 @@ const ProductPage = () => {
           {/* Desktop action buttons (inline) */}
           <div className="hidden lg:flex items-center gap-3 mt-6">
             <button data-testid="product-add-to-cart" onClick={add} disabled={outOfStock} className="flex-1 h-12 rounded-full border border-emerald-600 text-emerald-700 font-semibold inline-flex items-center justify-center gap-2 hover:bg-emerald-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
-              <ShoppingBag className="w-4 h-4" /> {outOfStock ? 'Out of stock' : 'Add to cart'}
+              <ShoppingBag className="w-4 h-4" /> {outOfStock ? 'স্টকে নেই' : 'কার্টে যোগ'}
             </button>
-            <button data-testid="product-buy-now" onClick={buy} disabled={outOfStock} className="flex-1 h-12 rounded-full bg-emerald-600 text-white font-semibold hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">Buy now</button>
+            <button data-testid="product-buy-now" onClick={buy} disabled={outOfStock} className="flex-1 h-12 rounded-full bg-emerald-600 text-white font-semibold hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">এখনই কিনুন</button>
           </div>
         </div>
       </div>
@@ -165,8 +165,8 @@ const ProductPage = () => {
       {related.length > 0 && (
         <div className="max-w-7xl mx-auto px-4 lg:px-6 mt-8">
           <div className="flex items-end justify-between mb-3">
-            <h3 className="text-base lg:text-lg font-extrabold">You may also like</h3>
-            <Link to={`/category/${p.category}`} className="text-[12px] font-semibold text-emerald-700 hover:text-emerald-800 transition-colors">See all</Link>
+            <h3 className="text-base lg:text-lg font-extrabold">আপনি এগুলোও পছন্দ করতে পারেন</h3>
+            <Link to={`/category/${p.category}`} className="text-[12px] font-semibold text-emerald-700 hover:text-emerald-800 transition-colors">সব দেখুন</Link>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
             {related.slice(0, 5).map((rp) => <ProductCard key={rp.id} product={rp} />)}
@@ -177,7 +177,7 @@ const ProductPage = () => {
       {/* Recently viewed */}
       {recent.length > 0 && (
         <div className="max-w-7xl mx-auto px-4 lg:px-6 mt-8">
-          <h3 className="text-base lg:text-lg font-extrabold mb-3">Recently viewed</h3>
+          <h3 className="text-base lg:text-lg font-extrabold mb-3">সম্প্রতি দেখা</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
             {recent.slice(0, 5).map((rp) => <ProductCard key={rp.id} product={rp} />)}
           </div>
@@ -187,9 +187,9 @@ const ProductPage = () => {
       {/* Mobile sticky action bar */}
       <div className="lg:hidden fixed bottom-16 inset-x-0 bg-white border-t border-neutral-100 px-4 py-3 flex items-center gap-2 z-30">
         <button data-testid="product-add-to-cart-mobile" onClick={add} disabled={outOfStock} className="flex-1 h-12 rounded-full border border-emerald-600 text-emerald-700 font-semibold inline-flex items-center justify-center gap-2 hover:bg-emerald-50 disabled:opacity-50">
-          <ShoppingBag className="w-4 h-4" /> {outOfStock ? 'Out of stock' : 'Add to cart'}
+          <ShoppingBag className="w-4 h-4" /> {outOfStock ? 'স্টকে নেই' : 'কার্টে যোগ'}
         </button>
-        <button data-testid="product-buy-now-mobile" onClick={buy} disabled={outOfStock} className="flex-1 h-12 rounded-full bg-emerald-600 text-white font-semibold hover:bg-emerald-700 disabled:opacity-50">Buy now</button>
+        <button data-testid="product-buy-now-mobile" onClick={buy} disabled={outOfStock} className="flex-1 h-12 rounded-full bg-emerald-600 text-white font-semibold hover:bg-emerald-700 disabled:opacity-50">এখনই কিনুন</button>
       </div>
     </div>
   );

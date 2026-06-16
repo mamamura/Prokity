@@ -4,10 +4,10 @@ import { Home, LayoutGrid, ShoppingBag, User } from 'lucide-react';
 import { useCart } from '../contexts/CartContext';
 
 const items = [
-  { to: '/', label: 'Home', icon: Home, exact: true },
-  { to: '/categories', label: 'Categories', icon: LayoutGrid },
-  { to: '/cart', label: 'Cart', icon: ShoppingBag, badge: true },
-  { to: '/profile', label: 'Profile', icon: User },
+  { to: '/', label: 'হোম', icon: Home, exact: true },
+  { to: '/categories', label: 'ক্যাটাগরি', icon: LayoutGrid },
+  { to: '/cart', label: 'কার্ট', icon: ShoppingBag, badge: true },
+  { to: '/profile', label: 'প্রোফাইল', icon: User },
 ];
 
 const BottomNav = () => {

@@ -17,6 +17,8 @@ import CartPage from './pages/Cart';
 import Checkout from './pages/Checkout';
 import Orders from './pages/Orders';
 import OrderDetail from './pages/OrderDetail';
+import Track from './pages/Track';
+import Receipt from './pages/Receipt';
 import Profile from './pages/Profile';
 import EditProfile from './pages/EditProfile';
 import Addresses from './pages/Addresses';
@@ -56,8 +58,8 @@ const AdminGate = ({ children }) => {
 
 const Shell = ({ children }) => {
   const { pathname } = useLocation();
-  const hideNav = pathname === '/login' || pathname === '/signup' || pathname.startsWith('/product/');
-  const hideDesktopNav = pathname === '/login' || pathname === '/signup';
+  const hideNav = pathname === '/login' || pathname === '/signup' || pathname.startsWith('/product/') || pathname.startsWith('/receipt/');
+  const hideDesktopNav = pathname === '/login' || pathname === '/signup' || pathname.startsWith('/receipt/');
   return (
     <div className="app-shell">
       {!hideDesktopNav && <DesktopNav />}
@@ -98,9 +100,11 @@ const AppRoutes = () => {
         <Route path="/category/:slug" element={<CategoryPage />} />
         <Route path="/product/:slug" element={<ProductPage />} />
         <Route path="/cart" element={<CartPage />} />
-        <Route path="/checkout" element={<Protected><Checkout /></Protected>} />
+        <Route path="/checkout" element={<Checkout />} />
         <Route path="/orders" element={<Orders />} />
-        <Route path="/order/:id" element={<Protected><OrderDetail /></Protected>} />
+        <Route path="/order/:id" element={<OrderDetail />} />
+        <Route path="/track" element={<Track />} />
+        <Route path="/receipt/:orderNo" element={<Receipt />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/profile/edit" element={<Protected><EditProfile /></Protected>} />
         <Route path="/profile/addresses" element={<Protected><Addresses /></Protected>} />

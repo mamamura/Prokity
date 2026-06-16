@@ -9,7 +9,7 @@ const Categories = () => {
   useEffect(() => { (async () => { const { data } = await api.get('/categories'); setCats(data); })(); }, []);
   return (
     <div className="pb-4">
-      <MobileHeader title="Categories" />
+      <MobileHeader title="ক্যাটাগরি" />
       <div className="px-4 mt-3 max-w-7xl mx-auto lg:px-6 lg:mt-8 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 lg:gap-4">
         {cats.map((c) => (
           <Link key={c.slug} to={`/category/${c.slug}`} className="rounded-2xl bg-white border border-neutral-100 overflow-hidden hover:shadow-sm transition-shadow">

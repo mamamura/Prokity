@@ -26,32 +26,33 @@ const Orders = () => {
 
   if (!user) return (
     <div className="pb-4">
-      <MobileHeader title="My orders" hideSearch />
+      <MobileHeader title="আমার অর্ডার" hideSearch />
       <div className="px-6 py-20 text-center">
         <Package className="w-10 h-10 text-neutral-300 mx-auto" />
-        <h2 className="text-base font-bold mt-3">Sign in to view orders</h2>
-        <p className="text-xs text-neutral-500 mt-1">Track and reorder your previous purchases.</p>
-        <Link to="/login?next=/orders" className="inline-flex mt-5 items-center gap-2 bg-emerald-600 text-white px-5 h-11 rounded-full text-sm font-semibold">Sign in</Link>
+        <h2 className="text-base font-bold mt-3">অর্ডার দেখতে লগইন করুন</h2>
+        <p className="text-xs text-neutral-500 mt-1">আগের অর্ডার ট্র্যাক ও রি-অর্ডার করুন।</p>
+        <Link to="/login?next=/orders" className="inline-flex mt-5 items-center gap-2 bg-emerald-600 text-white px-5 h-11 rounded-full text-sm font-semibold">লগইন</Link>
+        <div className="mt-4 text-[12px] text-neutral-500">গেস্ট অর্ডার? <Link to="/track" className="text-emerald-700 font-bold">/track পেজ থেকে দেখুন</Link></div>
       </div>
     </div>
   );
 
   return (
     <div className="pb-4 max-w-3xl mx-auto lg:px-6">
-      <MobileHeader title="My orders" hideSearch />
+      <MobileHeader title="আমার অর্ডার" hideSearch />
       <div className="hidden lg:block mt-6 mb-4">
-        <h1 className="text-3xl font-extrabold">My orders</h1>
-        <p className="text-sm text-neutral-500 mt-1">Track and reorder previous purchases.</p>
+        <h1 className="text-3xl font-extrabold">আমার অর্ডার</h1>
+        <p className="text-sm text-neutral-500 mt-1">আগের অর্ডার ট্র্যাক ও রি-অর্ডার করুন।</p>
       </div>
       <div className="px-4 mt-3 space-y-2.5">
         {loading ? (
-          <div className="py-10 text-center text-sm text-neutral-500">Loading…</div>
+          <div className="py-10 text-center text-sm text-neutral-500">লোড হচ্ছে…</div>
         ) : orders.length === 0 ? (
           <div className="py-16 text-center">
             <Package className="w-10 h-10 text-neutral-300 mx-auto" />
-            <h2 className="text-base font-bold mt-3">No orders yet</h2>
-            <p className="text-xs text-neutral-500 mt-1">Start shopping organic, fresh, local.</p>
-            <Link to="/" className="inline-flex mt-5 items-center gap-2 bg-emerald-600 text-white px-5 h-11 rounded-full text-sm font-semibold">Browse products</Link>
+            <h2 className="text-base font-bold mt-3">এখনো কোনো অর্ডার নেই</h2>
+            <p className="text-xs text-neutral-500 mt-1">তাজা অর্গানিক পণ্য কেনাকাটা শুরু করুন।</p>
+            <Link to="/" className="inline-flex mt-5 items-center gap-2 bg-emerald-600 text-white px-5 h-11 rounded-full text-sm font-semibold">পণ্য দেখুন</Link>
           </div>
         ) : orders.map((o) => (
           <Link key={o.id} to={`/order/${o.id}`} className="block rounded-2xl border border-neutral-100 p-3.5 hover:border-emerald-200 hover:bg-emerald-50/30 transition-colors">

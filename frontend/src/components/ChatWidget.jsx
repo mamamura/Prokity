@@ -88,8 +88,8 @@ const ChatWidget = () => {
             <div className="flex items-center gap-2">
               <div className="w-9 h-9 rounded-full bg-white/20 grid place-items-center"><Leaf className="w-4 h-4" /></div>
               <div className="leading-tight">
-                <div className="font-extrabold text-[14px]">Support chat</div>
-                <div className="text-[10.5px] opacity-80">We usually reply within minutes</div>
+                <div className="font-extrabold text-[14px]">সাপোর্ট চ্যাট</div>
+                <div className="text-[10.5px] opacity-80">আমরা সাধারণত কয়েক মিনিটে উত্তর দিই</div>
               </div>
             </div>
             <button onClick={() => setOpen(false)} className="w-9 h-9 grid place-items-center rounded-full hover:bg-white/15"><X className="w-5 h-5" /></button>
@@ -98,20 +98,20 @@ const ChatWidget = () => {
             {msgs.length === 0 ? (
               <div className="text-center py-10">
                 <div className="w-12 h-12 mx-auto rounded-full bg-emerald-100 grid place-items-center"><Leaf className="w-5 h-5 text-emerald-700" /></div>
-                <div className="text-sm font-semibold mt-2">Hi {user.name.split(' ')[0]} 👋</div>
-                <div className="text-[12px] text-neutral-500 mt-1">Ask anything about products or your order.</div>
+                <div className="text-sm font-semibold mt-2">হ্যালো {user.name.split(' ')[0]} 👋</div>
+                <div className="text-[12px] text-neutral-500 mt-1">পণ্য বা অর্ডার নিয়ে যেকোনো প্রশ্ন করুন।</div>
               </div>
             ) : msgs.map((m) => (
               <div key={m.id} className={`flex ${m.fromAdmin ? 'justify-start' : 'justify-end'}`}>
                 <div className={`max-w-[82%] rounded-2xl px-3 py-2 ${m.fromAdmin ? 'bg-white border border-neutral-200 text-neutral-800 rounded-bl-md' : 'bg-emerald-700 text-white rounded-br-md'}`}>
-                  {m.fromAdmin && (<div className="text-[10px] font-semibold text-emerald-700 mb-0.5">Support</div>)}
+                  {m.fromAdmin && (<div className="text-[10px] font-semibold text-emerald-700 mb-0.5">সাপোর্ট</div>)}
                   <div className="text-[13px] whitespace-pre-wrap break-words">{m.text}</div>
                 </div>
               </div>
             ))}
           </div>
           <form onSubmit={send} className="flex items-center gap-2 px-3 py-3 bg-white border-t border-neutral-200">
-            <input value={text} onChange={(e) => setText(e.target.value)} placeholder="Type a message…" className="flex-1 h-11 px-4 rounded-full bg-neutral-100 outline-none text-sm border border-transparent focus:bg-white focus:border-emerald-400" />
+            <input value={text} onChange={(e) => setText(e.target.value)} placeholder="বার্তা লিখুন…" className="flex-1 h-11 px-4 rounded-full bg-neutral-100 outline-none text-sm border border-transparent focus:bg-white focus:border-emerald-400" />
             <button type="submit" disabled={!text.trim() || sending} className="w-11 h-11 rounded-full bg-emerald-700 text-white grid place-items-center disabled:opacity-40 hover:bg-emerald-800">
               <Send className="w-4 h-4" />
             </button>

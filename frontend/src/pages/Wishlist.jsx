@@ -32,16 +32,16 @@ const Wishlist = () => {
 
   const addAndRemove = (p) => {
     addToCart(p, 1);
-    toast({ title: 'Added to cart', description: p.name });
+    toast({ title: 'কার্টে যোগ হয়েছে', description: p.name });
   };
 
   return (
     <div className="pb-24 lg:pb-12 max-w-5xl mx-auto lg:px-6">
-      <MobileHeader title="Wishlist" back hideSearch />
+      <MobileHeader title="উইশলিস্ট" back hideSearch />
       <div className="hidden lg:flex items-end justify-between mt-6 mb-2">
         <div>
-          <h1 className="text-3xl font-extrabold">Wishlist</h1>
-          <p className="text-sm text-neutral-500 mt-1">Products you've saved for later.</p>
+          <h1 className="text-3xl font-extrabold">উইশলিস্ট</h1>
+          <p className="text-sm text-neutral-500 mt-1">পরে কেনার জন্য সংরক্ষিত পণ্য।</p>
         </div>
       </div>
 
