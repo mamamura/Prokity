@@ -3,7 +3,7 @@ import { api, formatBDT } from '../../lib/api';
 import { Plus, Pencil, Trash2, X, Upload, Image as ImageIcon } from 'lucide-react';
 import { useToast } from '../../hooks/use-toast';
 
-const empty = { name: '', description: '', price: '', oldPrice: '', image: '', category: '', unit: '1 কেজি', stock: 100, organic: true, featured: false, tags: [] };
+const empty = { name: '', description: '', price: '', oldPrice: '', image: '', images: [], variants: [], category: '', unit: '1 কেজি', stock: 100, organic: true, featured: false, tags: [] };
 
 // Preset unit options — Bengali & English. Admin can also type custom.
 const UNIT_PRESETS = [
@@ -14,7 +14,7 @@ const UNIT_PRESETS = [
 
 const ProductForm = ({ initial, categories, onClose, onSaved }) => {
   const { toast } = useToast();
-  const [f, setF] = useState({ ...empty, ...(initial || {}), tags: initial?.tags || [], price: initial?.price?.toString() || '', oldPrice: initial?.oldPrice?.toString() || '' });
+  const [f, setF] = useState({ ...empty, ...(initial || {}), tags: initial?.tags || [], images: initial?.images || [], variants: initial?.variants || [], price: initial?.price?.toString() || '', oldPrice: initial?.oldPrice?.toString() || '' });
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [tagInput, setTagInput] = useState('');
@@ -37,12 +37,34 @@ const ProductForm = ({ initial, categories, onClose, onSaved }) => {
     reader.readAsDataURL(file);
   };
 
+  // Multiple images upload — appends to images gallery
+  const onMultiFiles = async (e) => {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+    setUploading(true);
+    const results = await Promise.all(files.map((file) => new Promise((res, rej) => {
+      const r = new FileReader();
+      r.onload = () => res(r.result);
+      r.onerror = () => rej();
+      r.readAsDataURL(file);
+    })));
+    setF((s) => ({ ...s, images: [...(s.images || []), ...results] }));
+    setUploading(false);
+    e.target.value = ''; // reset input so same file can be re-picked
+  };
+
+  const removeImage = (i) => setF((s) => ({ ...s, images: (s.images || []).filter((_, idx) => idx !== i) }));
+
+  const addVariant = () => setF((s) => ({ ...s, variants: [...(s.variants || []), { label: UNIT_PRESETS[0].items[3], price: s.price || 100, stock: 100 }] }));
+  const updateVariant = (i, patch) => setF((s) => ({ ...s, variants: s.variants.map((v, idx) => idx === i ? { ...v, ...patch } : v) }));
+  const removeVariant = (i) => setF((s) => ({ ...s, variants: s.variants.filter((_, idx) => idx !== i) }));
+
   const submit = async (e) => {
     e.preventDefault();
     if (!f.name || !f.price || !f.image || !f.category) { toast({ title: 'Fill all required fields', variant: 'destructive' }); return; }
     setSaving(true);
     try {
-      const payload = { name: f.name, description: f.description, price: parseFloat(f.price), oldPrice: f.oldPrice ? parseFloat(f.oldPrice) : null, image: f.image, category: f.category, unit: f.unit, stock: parseInt(f.stock) || 0, organic: f.organic, featured: f.featured, tags: f.tags };
+      const payload = { name: f.name, description: f.description, price: parseFloat(f.price), oldPrice: f.oldPrice ? parseFloat(f.oldPrice) : null, image: f.image, images: f.images || [], variants: (f.variants || []).map((v) => ({ label: v.label, price: parseFloat(v.price), oldPrice: v.oldPrice ? parseFloat(v.oldPrice) : null, stock: v.stock ? parseInt(v.stock) : null })), category: f.category, unit: f.unit, stock: parseInt(f.stock) || 0, organic: f.organic, featured: f.featured, tags: f.tags };
       if (initial?.id) { await api.put(`/products/${initial.id}`, payload); toast({ title: 'Product updated' }); }
       else { await api.post('/products', payload); toast({ title: 'Product created' }); }
       onSaved();
@@ -75,6 +97,24 @@ const ProductForm = ({ initial, categories, onClose, onSaved }) => {
                 )}
               </div>
             </div>
+          </div>
+
+          {/* Additional (gallery) images */}
+          <div>
+            <label className="text-[11px] font-semibold text-neutral-700 uppercase">অতিরিক্ত ছবি (গ্যালারি) — একাধিক আপলোড</label>
+            <div className="mt-1.5 flex flex-wrap gap-2">
+              {(f.images || []).map((img, i) => (
+                <div key={i} data-testid={`prod-gallery-${i}`} className="relative w-16 h-16 rounded-lg overflow-hidden border border-neutral-200 group">
+                  <img src={img} alt="" className="w-full h-full object-cover" />
+                  <button type="button" onClick={() => removeImage(i)} className="absolute top-0.5 right-0.5 w-5 h-5 grid place-items-center rounded-full bg-red-500 text-white opacity-0 group-hover:opacity-100 transition-opacity"><X className="w-3 h-3" /></button>
+                </div>
+              ))}
+              <label data-testid="prod-gallery-upload" className="w-16 h-16 rounded-lg border-2 border-dashed border-emerald-300 grid place-items-center cursor-pointer text-emerald-600 hover:bg-emerald-50 transition-colors">
+                <Plus className="w-5 h-5" />
+                <input data-testid="prod-gallery-files" type="file" accept="image/*" multiple onChange={onMultiFiles} className="hidden" />
+              </label>
+            </div>
+            <div className="text-[10.5px] text-neutral-500 mt-1">প্রোডাক্ট ডিটেইলে গ্যালারিতে দেখা যাবে। একসাথে একাধিক ছবি বাছাই করা যাবে।</div>
           </div>
           <div>
             <label className="text-[11px] font-semibold text-neutral-700 uppercase">Name *</label>
@@ -121,6 +161,41 @@ const ProductForm = ({ initial, categories, onClose, onSaved }) => {
               <label className="text-[11px] font-semibold text-neutral-700 uppercase">Stock</label>
               <input type="number" value={f.stock} onChange={(e) => setF({ ...f, stock: e.target.value })} className="mt-1 w-full h-11 px-3 rounded-xl bg-neutral-50 border border-neutral-200 outline-none focus:border-emerald-500 text-sm" />
             </div>
+          </div>
+
+          {/* Variants — per-product size/quantity options users can pick at checkout */}
+          <div className="rounded-2xl border-2 border-dashed border-emerald-200 bg-emerald-50/50 p-3.5">
+            <div className="flex items-center justify-between mb-2">
+              <div>
+                <div className="text-[13px] font-extrabold text-emerald-900">ভ্যারিয়েন্ট / পরিমাণ অপশন</div>
+                <div className="text-[10.5px] text-emerald-700 mt-0.5">গ্রাহক প্রোডাক্ট পেজে এখান থেকে একটি বেছে নিতে পারবে। খালি রাখলে শুধু ডিফল্ট Unit ব্যবহার হবে।</div>
+              </div>
+              <button data-testid="prod-add-variant" type="button" onClick={addVariant} className="inline-flex items-center gap-1 bg-emerald-700 text-white text-[11.5px] font-bold h-8 px-3 rounded-full hover:bg-emerald-800"><Plus className="w-3 h-3" /> যোগ করুন</button>
+            </div>
+            {(f.variants || []).length === 0 ? (
+              <div className="text-[11.5px] text-emerald-800/70 italic">কোনো ভ্যারিয়েন্ট নেই। "যোগ করুন" চেপে পরিমাণ (৫০০ গ্রাম / ১ কেজি ইত্যাদি) ও দাম দিন।</div>
+            ) : (
+              <div className="space-y-2">
+                {f.variants.map((v, i) => (
+                  <div key={i} data-testid={`prod-variant-${i}`} className="grid grid-cols-12 gap-2 items-center bg-white rounded-xl p-2 border border-emerald-100">
+                    <select data-testid={`prod-variant-label-${i}`} value={UNIT_PRESETS.some((g) => g.items.includes(v.label)) ? v.label : '__custom__'} onChange={(e) => { const val = e.target.value; if (val === '__custom__') updateVariant(i, { label: '' }); else updateVariant(i, { label: val }); }} className="col-span-5 h-10 px-2 rounded-lg bg-neutral-50 border border-neutral-200 outline-none focus:border-emerald-500 text-[12.5px]">
+                      {UNIT_PRESETS.map((g) => (
+                        <optgroup key={g.group} label={g.group}>
+                          {g.items.map((u) => (<option key={u} value={u}>{u}</option>))}
+                        </optgroup>
+                      ))}
+                      <option value="__custom__">🖋 কাস্টম</option>
+                    </select>
+                    {(!UNIT_PRESETS.some((g) => g.items.includes(v.label))) && (
+                      <input data-testid={`prod-variant-label-custom-${i}`} value={v.label} onChange={(e) => updateVariant(i, { label: e.target.value })} placeholder="Label" className="col-span-5 h-10 px-2 rounded-lg bg-neutral-50 border border-neutral-200 outline-none text-[12.5px]" />
+                    )}
+                    <input data-testid={`prod-variant-price-${i}`} type="number" step="0.01" value={v.price} onChange={(e) => updateVariant(i, { price: e.target.value })} placeholder="দাম" className="col-span-3 h-10 px-2 rounded-lg bg-neutral-50 border border-neutral-200 outline-none focus:border-emerald-500 text-[12.5px]" />
+                    <input data-testid={`prod-variant-stock-${i}`} type="number" value={v.stock ?? ''} onChange={(e) => updateVariant(i, { stock: e.target.value })} placeholder="স্টক" className="col-span-3 h-10 px-2 rounded-lg bg-neutral-50 border border-neutral-200 outline-none focus:border-emerald-500 text-[12.5px]" />
+                    <button data-testid={`prod-variant-remove-${i}`} type="button" onClick={() => removeVariant(i)} className="col-span-1 w-8 h-8 grid place-items-center rounded-full text-neutral-400 hover:text-red-600 hover:bg-red-50 mx-auto"><X className="w-4 h-4" /></button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
           <div>
             <label className="text-[11px] font-semibold text-neutral-700 uppercase">Tags</label>

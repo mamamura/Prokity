@@ -43,19 +43,23 @@ const CartPage = () => {
 
           <div className="px-4 mt-3 space-y-2">
             {cart.map((it) => (
-              <div key={it.id} data-testid={`cart-item-${it.slug || it.id}`} className="flex items-center gap-3 p-2.5 rounded-2xl border border-neutral-100">
-                <img src={it.image} alt={it.name} onError={(e) => { e.currentTarget.src = `https://placehold.co/100/f5f5f5/525252?text=img`; }} className="w-16 h-16 rounded-xl object-cover bg-neutral-50 shrink-0" />
+              <div key={`${it.id}::${it.variantLabel || ''}`} data-testid={`cart-item-${it.slug || it.id}${it.variantLabel ? '-' + it.variantLabel : ''}`} className="flex items-center gap-3 p-2.5 rounded-2xl border border-neutral-100">
+                <img src={it.image} alt={it.name} onError={(e) => { e.currentTarget.src = `https://placehold.co/100/f5f5f5/525252?text=img`; }} className="w-16 h-16 rounded-xl object-contain bg-transparent shrink-0" />
                 <div className="flex-1 min-w-0">
                   <div className="text-[13px] font-semibold line-clamp-2">{it.name}</div>
-                  <div className="text-[11px] text-neutral-500">{it.unit}</div>
+                  <div className="text-[11px] text-neutral-500">
+                    {it.variantLabel ? (
+                      <span className="inline-flex items-center gap-1"><span className="inline-block px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 font-semibold text-[10.5px]">{it.variantLabel}</span></span>
+                    ) : it.unit}
+                  </div>
                   <div className="mt-0.5 text-[14px] font-extrabold text-emerald-700">৳{formatBDT(it.price * it.qty)}</div>
                 </div>
                 <div className="flex flex-col items-end gap-1">
-                  <button onClick={() => removeFromCart(it.id)} aria-label="Remove" className="w-7 h-7 grid place-items-center rounded-full text-neutral-400 hover:text-red-600"><Trash2 className="w-3.5 h-3.5" /></button>
+                  <button onClick={() => removeFromCart(it.id, it.variantLabel)} aria-label="Remove" className="w-7 h-7 grid place-items-center rounded-full text-neutral-400 hover:text-red-600"><Trash2 className="w-3.5 h-3.5" /></button>
                   <div className="flex items-center bg-emerald-50 rounded-full h-8">
-                    <button onClick={() => updateQty(it.id, it.qty - 1)} className="w-7 h-full grid place-items-center text-emerald-700"><Minus className="w-3 h-3" /></button>
+                    <button onClick={() => updateQty(it.id, it.qty - 1, it.variantLabel)} className="w-7 h-full grid place-items-center text-emerald-700"><Minus className="w-3 h-3" /></button>
                     <span className="w-6 text-center text-xs font-bold text-emerald-700">{it.qty}</span>
-                    <button onClick={() => updateQty(it.id, it.qty + 1)} className="w-7 h-full grid place-items-center text-emerald-700"><Plus className="w-3 h-3" /></button>
+                    <button onClick={() => updateQty(it.id, it.qty + 1, it.variantLabel)} className="w-7 h-full grid place-items-center text-emerald-700"><Plus className="w-3 h-3" /></button>
                   </div>
                 </div>
               </div>

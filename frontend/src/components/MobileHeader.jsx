@@ -12,9 +12,24 @@ const MobileHeader = ({ title, back = false, hideSearch = false }) => {
   const [compact, setCompact] = useState(false);
 
   // Compact mode after user scrolls past 60px (only used on the home header).
+  // Guard against rapid toggling on mobile browsers where scroll events may
+  // fire in both directions during momentum — 24px hysteresis prevents jitter.
   useEffect(() => {
     if (title || back) return; // only home header collapses
-    const onScroll = () => setCompact(window.scrollY > 60);
+    let ticking = false;
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      window.requestAnimationFrame(() => {
+        setCompact((prev) => {
+          const y = window.scrollY;
+          if (!prev && y > 80) return true;
+          if (prev && y < 40) return false;
+          return prev;
+        });
+        ticking = false;
+      });
+    };
     window.addEventListener('scroll', onScroll, { passive: true });
     onScroll();
     return () => window.removeEventListener('scroll', onScroll);
@@ -57,12 +72,20 @@ const MobileHeader = ({ title, back = false, hideSearch = false }) => {
         </Link>
 
         <div className="flex items-center gap-2 shrink-0">
-          {/* Compact search icon — appears only when scrolled */}
+          {/* Compact search icon — smooth scale/fade transition (no width animation to avoid jitter) */}
           <button
             data-testid="home-search-icon-compact"
             onClick={() => navigate('/search')}
             aria-label="Search"
-            className={`grid place-items-center rounded-full bg-white/15 hover:bg-white/25 transition-all duration-200 overflow-hidden ${compact ? 'w-10 h-10 opacity-100 ml-0' : 'w-0 h-10 opacity-0 -ml-2 pointer-events-none'}`}
+            className="w-10 h-10 grid place-items-center rounded-full bg-white/15 hover:bg-white/25 transition-all duration-200 ease-out"
+            style={{
+              opacity: compact ? 1 : 0,
+              transform: compact ? 'scale(1)' : 'scale(0.7)',
+              width: compact ? 40 : 0,
+              marginRight: compact ? 0 : -8,
+              pointerEvents: compact ? 'auto' : 'none',
+              overflow: 'hidden',
+            }}
           >
             <Search className="w-4 h-4" />
           </button>
@@ -80,11 +103,17 @@ const MobileHeader = ({ title, back = false, hideSearch = false }) => {
         </div>
       </div>
 
-      {/* Full-width search bar — collapses height to 0 when compact */}
+      {/* Full-width search bar — collapses height smoothly */}
       <button
         data-testid="home-search-bar"
         onClick={() => navigate('/search')}
-        className={`w-full rounded-full bg-white text-neutral-500 px-4 flex items-center gap-2 text-sm overflow-hidden transition-all duration-200 ease-out ${compact ? 'h-0 mt-0 opacity-0 pointer-events-none' : 'h-11 mt-3 opacity-100'}`}
+        className="w-full rounded-full bg-white text-neutral-500 px-4 flex items-center gap-2 text-sm overflow-hidden transition-all duration-200 ease-out"
+        style={{
+          height: compact ? 0 : 44,
+          marginTop: compact ? 0 : 12,
+          opacity: compact ? 0 : 1,
+          pointerEvents: compact ? 'none' : 'auto',
+        }}
       >
         <Search className="w-4 h-4" />
         <span>মধু, তেল, মসলা খুঁজুন…</span>

@@ -5,6 +5,7 @@ import { User, LogOut, ChevronRight, Phone, Mail, ClipboardList, HelpCircle, Lea
 import MobileHeader from '../components/MobileHeader';
 import { ADMIN_PATH } from '../lib/admin-path';
 import { formatBDT } from '../lib/api';
+import { useChat } from '../contexts/ChatContext';
 
 const ProfileRow = ({ icon: Icon, label, to, onClick, danger = false, testid, sub }) => {
   const cls = `w-full flex items-center justify-between p-3.5 rounded-2xl bg-white border border-neutral-100 ${danger ? 'text-red-600' : 'text-neutral-800'} hover:bg-neutral-50 hover:border-emerald-200 transition-all duration-200`;
@@ -43,6 +44,7 @@ const useGuestOrders = () => {
 const Profile = () => {
   const { user, logout } = useAuth();
   const nav = useNavigate();
+  const { openChat } = useChat();
   const { orders: guestOrders, remove: removeGuestOrder } = useGuestOrders();
 
   if (!user) return (
@@ -66,7 +68,7 @@ const Profile = () => {
       <div className="px-4 mt-8 space-y-2">
         <div className="text-[11px] uppercase tracking-wider font-bold text-neutral-500 px-1">গেস্ট অপশন</div>
         <ProfileRow icon={Search} label="অর্ডার ট্র্যাক করুন" sub="অর্ডার নম্বর ও মোবাইল নম্বর দিয়ে" to="/track" testid="profile-row-track-guest" />
-        <ProfileRow icon={MessageCircle} label="হেল্প ও সাপোর্ট" to="/messages" testid="profile-row-help-guest" />
+        <ProfileRow icon={MessageCircle} label="হেল্প ও সাপোর্ট" onClick={() => openChat()} testid="profile-row-help-guest" />
       </div>
 
       {/* Guest's local orders */}
@@ -125,7 +127,7 @@ const Profile = () => {
             <ProfileRow icon={ShieldCheck} label="অ্যাডমিন ড্যাশবোর্ড" to={ADMIN_PATH} testid="profile-row-admin" />
           )}
           <ProfileRow icon={Leaf} label="অর্গানিক সার্টিফিকেশন" onClick={() => {}} testid="profile-row-about" />
-          <ProfileRow icon={HelpCircle} label="হেল্প ও সাপোর্ট" to="/messages" testid="profile-row-help" />
+          <ProfileRow icon={HelpCircle} label="হেল্প ও সাপোর্ট" onClick={() => openChat()} testid="profile-row-help" />
           <ProfileRow icon={LogOut} label="লগআউট" danger onClick={() => { logout(); nav('/'); }} testid="profile-row-logout" />
         </div>
 

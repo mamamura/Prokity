@@ -34,13 +34,15 @@ export const CartProvider = ({ children }) => {
 
   const addToCart = (product, qty = 1) => {
     setCart((prev) => {
-      const exist = prev.find((p) => p.id === product.id);
-      if (exist) return prev.map((p) => (p.id === product.id ? { ...p, qty: p.qty + qty } : p));
-      return [...prev, { id: product.id, slug: product.slug, name: product.name, image: product.image, price: product.price, oldPrice: product.oldPrice, unit: product.unit, qty }];
+      const key = (p) => `${p.id}::${p.variantLabel || ''}`;
+      const incomingKey = key(product);
+      const exist = prev.find((p) => key(p) === incomingKey);
+      if (exist) return prev.map((p) => (key(p) === incomingKey ? { ...p, qty: p.qty + qty } : p));
+      return [...prev, { id: product.id, slug: product.slug, name: product.name, image: product.image, price: product.price, oldPrice: product.oldPrice, unit: product.unit, variantLabel: product.variantLabel || null, qty }];
     });
   };
-  const updateQty = (id, qty) => setCart((p) => p.map((i) => (i.id === id ? { ...i, qty: Math.max(1, qty) } : i)));
-  const removeFromCart = (id) => setCart((p) => p.filter((i) => i.id !== id));
+  const updateQty = (id, qty, variantLabel = null) => setCart((p) => p.map((i) => (i.id === id && (i.variantLabel || null) === (variantLabel || null) ? { ...i, qty: Math.max(1, qty) } : i)));
+  const removeFromCart = (id, variantLabel = null) => setCart((p) => p.filter((i) => !(i.id === id && (i.variantLabel || null) === (variantLabel || null))));
   const clearCart = () => setCart([]);
 
   const cartCount = useMemo(() => cart.reduce((s, i) => s + i.qty, 0), [cart]);

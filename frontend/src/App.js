@@ -6,6 +6,7 @@ import { CartProvider } from './contexts/CartContext';
 import { NotifProvider } from './contexts/NotifContext';
 import { WishlistProvider } from './contexts/WishlistContext';
 import { SiteProvider, useSite } from './contexts/SiteContext';
+import { ChatProvider } from './contexts/ChatContext';
 import { Protected } from './components/Protected';
 import BottomNav from './components/BottomNav';
 import DesktopNav from './components/DesktopNav';
@@ -131,10 +132,12 @@ function App() {
         <CartProvider>
           <NotifProvider>
             <WishlistProvider>
-              <BrowserRouter>
-                <AppRoutes />
-                <Toaster />
-              </BrowserRouter>
+              <ChatProvider>
+                <BrowserRouter>
+                  <AppRoutes />
+                  <Toaster />
+                </BrowserRouter>
+              </ChatProvider>
             </WishlistProvider>
           </NotifProvider>
         </CartProvider>

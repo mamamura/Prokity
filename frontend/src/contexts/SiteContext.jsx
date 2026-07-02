@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { api } from '../lib/api';
+import { THEMES, findTheme, buildThemeCss } from '../lib/themes';
 
 const SiteContext = createContext(null);
 
@@ -9,32 +10,51 @@ const DEFAULTS = {
   logoUrl: '',
   brandColor: '#047857',
   brandColorDark: '#065f46',
+  themeId: 'emerald',
   showChatWidget: true,
   showTracker: true,
   showNewsletter: true,
 };
 
 /**
- * Provides admin-managed site settings (branding + feature flags) globally.
- * Reads /settings/site once on mount and applies brandColor as CSS variables.
+ * Provides admin-managed site settings globally, injects the selected
+ * theme's CSS overrides into <head>, and updates <meta theme-color>.
  */
 export const SiteProvider = ({ children }) => {
   const [settings, setSettings] = useState(DEFAULTS);
+
   useEffect(() => {
     (async () => {
       try {
         const { data } = await api.get('/settings/site');
-        const merged = { ...DEFAULTS, ...data };
-        setSettings(merged);
-        // Apply brand color as CSS variables for legacy components / inline styles
-        if (typeof document !== 'undefined') {
-          document.documentElement.style.setProperty('--brand', merged.brandColor);
-          document.documentElement.style.setProperty('--brand-dark', merged.brandColorDark);
-        }
+        setSettings({ ...DEFAULTS, ...data });
       } catch (_) { /* keep defaults on failure */ }
     })();
   }, []);
-  return <SiteContext.Provider value={settings}>{children}</SiteContext.Provider>;
+
+  // Apply theme whenever it changes
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    const theme = findTheme(settings.themeId);
+    let styleEl = document.getElementById('brand-theme-css');
+    if (!styleEl) {
+      styleEl = document.createElement('style');
+      styleEl.id = 'brand-theme-css';
+      document.head.appendChild(styleEl);
+    }
+    styleEl.innerHTML = buildThemeCss(theme);
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute('content', theme.primary);
+  }, [settings.themeId]);
+
+  const refresh = async () => {
+    try {
+      const { data } = await api.get('/settings/site');
+      setSettings({ ...DEFAULTS, ...data });
+    } catch (_) {}
+  };
+
+  return <SiteContext.Provider value={{ ...settings, refresh, themes: THEMES }}>{children}</SiteContext.Provider>;
 };
 
-export const useSite = () => useContext(SiteContext) || DEFAULTS;
+export const useSite = () => useContext(SiteContext) || { ...DEFAULTS, themes: THEMES, refresh: () => {} };

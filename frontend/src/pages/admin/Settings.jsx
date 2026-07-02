@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../../lib/api';
 import { useToast } from '../../hooks/use-toast';
-import { Save, Smartphone, Wallet, Info, Globe, Truck, Building2, MessageCircle as MC, Percent, Tag, Palette, Upload, Image as ImageIcon, X, ToggleRight } from 'lucide-react';
+import { THEMES } from '../../lib/themes';
+import { Save, Smartphone, Wallet, Info, Globe, Truck, Building2, MessageCircle as MC, Percent, Tag, Palette, Upload, Image as ImageIcon, X, ToggleRight, Check } from 'lucide-react';
 
 const tabs = [
   { key: 'branding', label: 'Branding', icon: Palette },
@@ -41,7 +42,7 @@ const AdminSettings = () => {
   const saveSite = async (e) => {
     e.preventDefault();
     setSaving(true);
-    try { await api.put('/admin/settings/site', s); toast({ title: 'Site settings updated' }); }
+    try { await api.put('/admin/settings/site', s); toast({ title: 'Site settings updated' }); await refresh(); }
     catch (e) { toast({ title: 'Save failed', description: e.response?.data?.detail || 'Try again', variant: 'destructive' }); }
     finally { setSaving(false); }
   };

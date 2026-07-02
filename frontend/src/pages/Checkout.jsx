@@ -163,7 +163,7 @@ const Checkout = () => {
     }
     setLoading(true);
     try {
-      const items = cart.map((i) => ({ productId: i.id, name: i.name, image: i.image, price: i.price, qty: i.qty, unit: i.unit }));
+      const items = cart.map((i) => ({ productId: i.id, name: i.name, image: i.image, price: i.price, qty: i.qty, unit: i.unit, variant: i.variantLabel || null }));
       const useSaved = !newMode && addresses.length > 0 && selectedAddrId;
       const finalAddr = useSaved ? addresses.find((a) => a.id === selectedAddrId) : addr;
       const { data } = await api.post('/orders', {

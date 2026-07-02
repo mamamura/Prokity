@@ -84,6 +84,12 @@ class Category(BaseModel):
     icon: str
     image: Optional[str] = None
 
+class ProductVariant(BaseModel):
+    label: str
+    price: float
+    oldPrice: Optional[float] = None
+    stock: Optional[int] = None
+
 class ProductCreate(BaseModel):
     name: str
     slug: Optional[str] = None
@@ -98,6 +104,7 @@ class ProductCreate(BaseModel):
     organic: bool = True
     featured: bool = False
     tags: Optional[List[str]] = []
+    variants: Optional[List[ProductVariant]] = []
 
 class ProductUpdate(BaseModel):
     name: Optional[str] = None
@@ -113,6 +120,7 @@ class ProductUpdate(BaseModel):
     organic: Optional[bool] = None
     featured: Optional[bool] = None
     tags: Optional[List[str]] = None
+    variants: Optional[List[ProductVariant]] = None
 
 class OrderItem(BaseModel):
     productId: str
@@ -121,6 +129,7 @@ class OrderItem(BaseModel):
     price: float
     qty: int
     unit: Optional[str] = None
+    variant: Optional[str] = None
 
 class Address(BaseModel):
     id: Optional[str] = None
@@ -236,6 +245,7 @@ class SiteSettings(BaseModel):
     logoUrl: Optional[str] = ''                   # data URL or public path; falls back to /logo.png
     brandColor: Optional[str] = '#047857'         # primary accent color used across UI
     brandColorDark: Optional[str] = '#065f46'     # hover / darker shade
+    themeId: Optional[str] = 'emerald'            # preset theme id from THEMES
     # Feature toggles
     showChatWidget: Optional[bool] = True
     showTracker: Optional[bool] = True
@@ -566,7 +576,7 @@ SITE_DEFAULTS = {
     'facebookUrl': '', 'instagramUrl': '', 'whatsappNumber': '',
     'deliveryFee': 60, 'freeDeliveryAbove': 500, 'aboutText': '',
     'globalDiscountPercent': 0, 'globalDiscountLabel': '', 'taxPercent': 0, 'minOrderAmount': 0,
-    'logoUrl': '', 'brandColor': '#047857', 'brandColorDark': '#065f46',
+    'logoUrl': '', 'brandColor': '#047857', 'brandColorDark': '#065f46', 'themeId': 'emerald',
     'showChatWidget': True, 'showTracker': True, 'showNewsletter': True,
 }
 
@@ -771,6 +781,7 @@ async def create_product(body: ProductCreate, admin = Depends(get_admin)):
         'organic': body.organic,
         'featured': body.featured,
         'tags': body.tags or [],
+        'variants': [v.model_dump() for v in (body.variants or [])],
         'createdAt': datetime.utcnow().isoformat(),
     }
     await db.products.insert_one(product)
@@ -782,6 +793,9 @@ async def update_product(product_id: str, body: ProductUpdate, admin = Depends(g
     existing = await db.products.find_one({'id': product_id})
     if not existing: raise HTTPException(404, 'Product not found')
     update = {k: v for k, v in body.model_dump(exclude_unset=True).items() if v is not None}
+    # Serialize nested variants (list of ProductVariant pydantic → dicts)
+    if 'variants' in update and update['variants'] is not None:
+        update['variants'] = [v if isinstance(v, dict) else v.model_dump() for v in update['variants']]
     if 'price' in update or 'oldPrice' in update:
         price = update.get('price', existing.get('price'))
         old = update.get('oldPrice', existing.get('oldPrice'))

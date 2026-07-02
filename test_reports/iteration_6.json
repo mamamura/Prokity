@@ -1,0 +1,40 @@
+{
+  "summary": "Iteration 6 partial fail. Backend variants + themeId endpoints WORK (3/3 pytest pass). Frontend has 2 P0 blockers: (a) ProductPage crashes with 'activeImage is not defined' (ReferenceError) — also galleryImages/effectivePrice/effectiveUnit/effectiveOldPrice are referenced but never defined in Product.jsx, so the entire variant picker + gallery + add-to-cart flow is untestable and the page shows the redbox error overlay. (b) 10-theme radio grid is MISSING from admin Settings Branding tab — THEMES is imported into Settings.jsx but never rendered; no data-testid='theme-radio-*' cards exist. Other features PASS: FAB redesign (Headphones icon + gradient inner span), admin variant form UI (prod-add-variant + variant rows work), admin multi-image upload (prod-gallery-upload/files, multiple attr present), Profile.jsx wired to useChat().openChat, ChatContext provides open/close, mobile scroll compact appears smoothly (minor: didn't collapse back at scrollY=20 which is under the 40 hysteresis, but no visible jitter). Backend endpoints for variants (POST/GET/PUT) and themeId persistence all pass.",
+  "backend_issues": { "critical": [], "minor": [] },
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "Product.jsx", "issue": "ReferenceError: activeImage is not defined — also galleryImages, effectivePrice, effectiveUnit, effectiveOldPrice are referenced but never derived. Entire ProductPage crashes on /product/test-variant-honey (and every product page). Uncaught runtime error overlay shown; variant-option-*, gallery-thumb-*, product-add-to-cart cannot render.", "selector": "[data-testid='variant-option-0']", "priority": "P0"},
+      {"component": "admin/Settings.jsx (Branding tab)", "issue": "THEMES imported (line 4) but the 10 theme radio cards are NOT rendered anywhere in the file. Missing data-testid='theme-radio-emerald/rose/ocean/royal/sunset/teal/gold/midnight/slate/blossom'. Admin cannot pick a preset theme. Save with themeId change never happens from UI.", "selector": "[data-testid='theme-radio-rose']", "priority": "P0"}
+    ],
+    "integration_issues": [
+      {"flow": "Variant → Cart", "issue": "Blocked by ProductPage crash. Could not verify addToCart passes variantLabel or Cart shows variant badge. Backend accepts variants — persistence verified via API.", "affected_selectors": ["[data-testid='product-add-to-cart']", "[data-testid='cart-item-variant']"]},
+      {"flow": "Multi-image gallery on public product page", "issue": "Blocked by ProductPage crash. gallery-thumb-* never render because component throws before render.", "affected_selectors": ["[data-testid='gallery-thumb-1']"]}
+    ],
+    "design_issues": [
+      {"screen": "MobileHeader compact icon (mobile 414w)", "issues": ["home-search-icon-compact stays visible when scrolling back to scrollY=20 (below the 40 lower hysteresis threshold). Hide-below-40 logic may not be firing. No visible jitter though."]}
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_iteration6.py",
+    "/app/test_reports/pytest/iteration6.xml"
+  ],
+  "action_items": [
+    "Fix Product.jsx: derive `galleryImages = [p.image, ...(p.images||[])].filter(Boolean)` (dedup), `activeImage = galleryImages[galleryIdx] || p.image`, `effectivePrice = selectedVariant?.price ?? p.price`, `effectiveOldPrice = selectedVariant?.oldPrice ?? p.oldPrice`, `effectiveUnit = selectedVariant?.label ?? p.unit`. Also pass variant into addToCart, e.g., addToCart(p, qty, selectedVariant?.label).",
+    "Add 10 theme radio grid to admin/Settings.jsx Branding tab: iterate THEMES; render cards with data-testid={`theme-radio-${t.id}`}. Update form state to include themeId, include themeId in the PUT payload of settings-branding-save.",
+    "Verify MobileHeader compact hide threshold — appears hide (<40) branch is not toggling; possibly rAF sets state but doesn't clear when scrolling down-then-up quickly, or condition uses > 80 for show without a matching < 40 for hide.",
+    "Confirm variant-aware cart badge renders 'বেছে নেওয়া: <label>' on /cart after variants are fixed."
+  ],
+  "critical_code_review_comments": [
+    "Product.jsx uses several derived values (activeImage, galleryImages, effective*) with no declaration — indicates a lost/never-committed derivation block. Add before `return (...)`.",
+    "Settings.jsx: dead import of THEMES; likely the entire theme picker JSX was omitted during the iteration.",
+    "Consider stacking `bg-emerald-700` overrides only when a non-default themeId is set to avoid needless !important CSS on default install (current builds inject 2889 chars even for emerald)."
+  ],
+  "updated_files": ["/app/backend/tests/test_iteration6.py", "/app/test_reports/iteration_6.json"],
+  "success_rate": { "backend": "100% (3/3)", "frontend": "~55% — 2 P0 features (variant picker/gallery on product page, theme radio grid) not usable" },
+  "test_credentials": "admin@organicshop.com / admin123 (from /app/memory/test_credentials.md)",
+  "seed_data_creation": "Created & deleted TEST_Variant Honey Iter6 during pytest run. Existing test-variant-honey seed left intact.",
+  "retest_needed": true,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "After main agent fixes Product.jsx (add missing derived vars) and Settings.jsx (render THEMES radio grid), re-verify: (1) /product/test-variant-honey shows 3 variant-option-* buttons that update price/unit; (2) gallery-thumb-* swaps main image; (3) add-to-cart carries variant label to /cart with 'বেছে নেওয়া' badge; (4) admin theme-radio-rose click → save → public /` has `background-color: #be123c` in <style id='brand-theme-css'>; then RESET themeId to emerald. Backend already verified.",
+  "rca of the issue": "Product.jsx render block references activeImage/galleryImages/effectivePrice/effectiveOldPrice/effectiveUnit but they are never declared in the component body (only galleryIdx state + selectedVariant state exist). React throws ReferenceError on first render → entire route unusable. Settings.jsx imports THEMES but does not render the picker JSX; state has no themeId, save button never includes themeId in PUT payload. Both appear to be omissions during main-agent edit."
+}
