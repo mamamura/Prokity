@@ -4,6 +4,7 @@ import { ArrowRight, Leaf, ShieldCheck, Truck, Sparkles, PackageSearch } from 'l
 import { api, formatBDT } from '../lib/api';
 import ProductCard from '../components/ProductCard';
 import MobileHeader from '../components/MobileHeader';
+import { useSite } from '../contexts/SiteContext';
 
 const Skeleton = ({ count = 4 }) => (
   <div className="grid grid-cols-2 gap-3">
@@ -27,6 +28,7 @@ const Home = () => {
   const [banners, setBanners] = useState([]);
   const [loading, setLoading] = useState(true);
   const nav = useNavigate();
+  const site = useSite();
 
   useEffect(() => {
     (async () => {
@@ -84,6 +86,7 @@ const Home = () => {
       </div>
 
       {/* Order tracker — prominent CTA so guests can quickly track without an account */}
+      {site.showTracker && (
       <div className="px-4 mt-4 max-w-7xl mx-auto lg:px-6 lg:mt-6">
         <Link
           to="/track"
@@ -108,6 +111,7 @@ const Home = () => {
           </div>
         </Link>
       </div>
+      )}
 
       {/* Categories */}
       <section className="px-4 mt-5 max-w-7xl mx-auto lg:px-6 lg:mt-10">
@@ -161,7 +165,7 @@ const Home = () => {
       </div>
 
       {/* Newsletter */}
-      <Newsletter />
+      {site.showNewsletter && <Newsletter />}
     </div>
   );
 };

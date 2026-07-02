@@ -17,7 +17,7 @@ const EditProfile = () => {
 
   const onFile = (e) => {
     const file = e.target.files?.[0]; if (!file) return;
-    if (file.size > 2 * 1024 * 1024) { toast({ title: 'ছবি অনেক বড় (সর্বোচ্চ ২ MB)', variant: 'destructive' }); return; }
+    if (!file) return;
     const reader = new FileReader();
     reader.onload = () => setF((s) => ({ ...s, avatar: reader.result }));
     reader.readAsDataURL(file);
@@ -55,7 +55,7 @@ const EditProfile = () => {
           </div>
           <div className="flex-1">
             <div className="text-[13px] font-semibold">প্রোফাইল ছবি</div>
-            <div className="text-[11.5px] text-neutral-500 mt-0.5">PNG/JPG, সর্বোচ্চ ২ MB।</div>
+            <div className="text-[11.5px] text-neutral-500 mt-0.5">PNG/JPG।</div>
             {f.avatar && (<button type="button" onClick={() => setF((s) => ({ ...s, avatar: '' }))} className="mt-1.5 text-[11px] text-red-600 font-semibold">ছবি সরান</button>)}
           </div>
         </div>

@@ -232,6 +232,14 @@ class SiteSettings(BaseModel):
     globalDiscountLabel: Optional[str] = ''       # marketing label e.g. "ঈদ ডিসকাউন্ট"
     taxPercent: Optional[float] = 0               # VAT/Tax % applied on (subtotal − discount)
     minOrderAmount: Optional[float] = 0           # minimum order to checkout
+    # Branding controls (admin-managed)
+    logoUrl: Optional[str] = ''                   # data URL or public path; falls back to /logo.png
+    brandColor: Optional[str] = '#047857'         # primary accent color used across UI
+    brandColorDark: Optional[str] = '#065f46'     # hover / darker shade
+    # Feature toggles
+    showChatWidget: Optional[bool] = True
+    showTracker: Optional[bool] = True
+    showNewsletter: Optional[bool] = True
 
 
 class BannerUpsert(BaseModel):
@@ -558,6 +566,8 @@ SITE_DEFAULTS = {
     'facebookUrl': '', 'instagramUrl': '', 'whatsappNumber': '',
     'deliveryFee': 60, 'freeDeliveryAbove': 500, 'aboutText': '',
     'globalDiscountPercent': 0, 'globalDiscountLabel': '', 'taxPercent': 0, 'minOrderAmount': 0,
+    'logoUrl': '', 'brandColor': '#047857', 'brandColorDark': '#065f46',
+    'showChatWidget': True, 'showTracker': True, 'showNewsletter': True,
 }
 
 @api.get('/settings/site')

@@ -3,7 +3,14 @@ import { api, formatBDT } from '../../lib/api';
 import { Plus, Pencil, Trash2, X, Upload, Image as ImageIcon } from 'lucide-react';
 import { useToast } from '../../hooks/use-toast';
 
-const empty = { name: '', description: '', price: '', oldPrice: '', image: '', category: '', unit: '1 kg', stock: 100, organic: true, featured: false, tags: [] };
+const empty = { name: '', description: '', price: '', oldPrice: '', image: '', category: '', unit: '1 কেজি', stock: 100, organic: true, featured: false, tags: [] };
+
+// Preset unit options — Bengali & English. Admin can also type custom.
+const UNIT_PRESETS = [
+  { group: 'ওজন (গ্রাম / কেজি)', items: ['১০০ গ্রাম', '২০০ গ্রাম', '২৫০ গ্রাম', '৫০০ গ্রাম', '১ কেজি', '২ কেজি', '৫ কেজি', '১০ কেজি'] },
+  { group: 'তরল (মিলি / লিটার)', items: ['১০০ মিলি', '২৫০ মিলি', '৫০০ মিলি', '১ লিটার', '২ লিটার', '৫ লিটার'] },
+  { group: 'পিস / প্যাক', items: ['১ পিস', '২ পিস', '৪ পিস', '৬ পিস', '১ ডজন (১২ পিস)', '১ হালি (৪ পিস)', '১ প্যাক', '১ বোতল', '১ বান্ডেল'] },
+];
 
 const ProductForm = ({ initial, categories, onClose, onSaved }) => {
   const { toast } = useToast();
@@ -23,10 +30,10 @@ const ProductForm = ({ initial, categories, onClose, onSaved }) => {
 
   const onFile = async (e) => {
     const file = e.target.files?.[0]; if (!file) return;
-    if (file.size > 2 * 1024 * 1024) { toast({ title: 'Image too large (max 2 MB)', variant: 'destructive' }); return; }
     setUploading(true);
     const reader = new FileReader();
     reader.onload = () => { setF((s) => ({ ...s, image: reader.result })); setUploading(false); };
+    reader.onerror = () => { toast({ title: 'ছবি পড়া যায়নি', variant: 'destructive' }); setUploading(false); };
     reader.readAsDataURL(file);
   };
 
@@ -61,10 +68,11 @@ const ProductForm = ({ initial, categories, onClose, onSaved }) => {
               <div className="flex-1 space-y-2">
                 <label className="flex items-center gap-2 cursor-pointer px-3 py-2 rounded-lg bg-emerald-50 text-emerald-700 text-sm font-medium hover:bg-emerald-100 w-fit">
                   <Upload className="w-4 h-4" /> {uploading ? 'Uploading…' : 'Upload image'}
-                  <input type="file" accept="image/*" onChange={onFile} className="hidden" />
+                  <input data-testid="prod-image-file" type="file" accept="image/*" onChange={onFile} className="hidden" />
                 </label>
-                <input value={f.image?.startsWith('data:') ? '' : f.image} onChange={(e) => setF({ ...f, image: e.target.value })} placeholder="or paste image URL" className="w-full h-9 px-3 rounded-lg bg-neutral-50 border border-neutral-200 outline-none focus:border-emerald-500 text-xs" />
-                <div className="text-[10.5px] text-neutral-500">PNG/JPG, up to 2 MB.</div>
+                {f.image && (
+                  <button type="button" onClick={() => setF({ ...f, image: '' })} className="inline-flex items-center gap-1 text-[11px] text-red-600 font-semibold"><X className="w-3 h-3" /> ছবি সরান</button>
+                )}
               </div>
             </div>
           </div>
@@ -85,8 +93,19 @@ const ProductForm = ({ initial, categories, onClose, onSaved }) => {
               </select>
             </div>
             <div>
-              <label className="text-[11px] font-semibold text-neutral-700 uppercase">Unit</label>
-              <input value={f.unit} onChange={(e) => setF({ ...f, unit: e.target.value })} placeholder="e.g. 500 g, 1 L" className="mt-1 w-full h-11 px-3 rounded-xl bg-neutral-50 border border-neutral-200 outline-none focus:border-emerald-500 text-sm" />
+              <label className="text-[11px] font-semibold text-neutral-700 uppercase">Unit / পরিমাণ</label>
+              <select data-testid="prod-unit-select" value={UNIT_PRESETS.some((g) => g.items.includes(f.unit)) ? f.unit : '__custom__'} onChange={(e) => { const v = e.target.value; if (v === '__custom__') { setF({ ...f, unit: '' }); } else { setF({ ...f, unit: v }); } }} className="mt-1 w-full h-11 px-3 rounded-xl bg-neutral-50 border border-neutral-200 outline-none focus:border-emerald-500 text-sm">
+                {UNIT_PRESETS.map((g) => (
+                  <optgroup key={g.group} label={g.group}>
+                    {g.items.map((u) => (<option key={u} value={u}>{u}</option>))}
+                  </optgroup>
+                ))}
+                <option value="__custom__">🖋 কাস্টম (নিজে লিখুন)</option>
+              </select>
+              {(!UNIT_PRESETS.some((g) => g.items.includes(f.unit))) && (
+                <input data-testid="prod-unit-custom" value={f.unit} onChange={(e) => setF({ ...f, unit: e.target.value })} placeholder="যেমন: ৩ কেজি, ১৫০ মিলি, ৮ পিস" className="mt-2 w-full h-10 px-3 rounded-xl bg-neutral-50 border border-neutral-200 outline-none focus:border-emerald-500 text-sm" />
+              )}
+              <div className="text-[10.5px] text-neutral-500 mt-1">গ্রাহক প্রোডাক্ট কার্ডে এই পরিমাণ দেখবে।</div>
             </div>
           </div>
           <div className="grid grid-cols-3 gap-3">

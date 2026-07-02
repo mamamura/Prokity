@@ -103,7 +103,7 @@ const Track = () => {
                 <span className="text-[10.5px] uppercase font-bold bg-white/20 px-2 py-0.5 rounded-full">{o.paymentMethod}</span>
               </div>
               <div className="mt-3 flex gap-2">
-                <Link to={`/receipt/${o.orderNo}?phone=${encodeURIComponent(phone.trim())}`} target="_blank" className="inline-flex items-center gap-1.5 bg-white text-emerald-700 px-3 h-9 rounded-full text-[12px] font-bold hover:bg-emerald-50 transition-colors">
+                <Link to={`/receipt/${o.orderNo}?phone=${encodeURIComponent(phone.trim())}`} className="inline-flex items-center gap-1.5 bg-white text-emerald-700 px-3 h-9 rounded-full text-[12px] font-bold hover:bg-emerald-50 transition-colors">
                   <Download className="w-3.5 h-3.5" /> পিডিএফ রসিদ
                 </Link>
               </div>

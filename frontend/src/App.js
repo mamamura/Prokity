@@ -5,6 +5,7 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { CartProvider } from './contexts/CartContext';
 import { NotifProvider } from './contexts/NotifContext';
 import { WishlistProvider } from './contexts/WishlistContext';
+import { SiteProvider, useSite } from './contexts/SiteContext';
 import { Protected } from './components/Protected';
 import BottomNav from './components/BottomNav';
 import DesktopNav from './components/DesktopNav';
@@ -58,6 +59,7 @@ const AdminGate = ({ children }) => {
 
 const Shell = ({ children }) => {
   const { pathname } = useLocation();
+  const site = useSite();
   const hideNav = pathname === '/login' || pathname === '/signup' || pathname.startsWith('/product/') || pathname.startsWith('/receipt/');
   const hideDesktopNav = pathname === '/login' || pathname === '/signup' || pathname.startsWith('/receipt/');
   return (
@@ -65,7 +67,7 @@ const Shell = ({ children }) => {
       {!hideDesktopNav && <DesktopNav />}
       <div className="app-content">{children}</div>
       {!hideNav && <BottomNav />}
-      <ChatWidget />
+      {site.showChatWidget && <ChatWidget />}
     </div>
   );
 };
@@ -125,16 +127,18 @@ const AppRoutes = () => {
 function App() {
   return (
     <AuthProvider>
-      <CartProvider>
-        <NotifProvider>
-          <WishlistProvider>
-            <BrowserRouter>
-              <AppRoutes />
-              <Toaster />
-            </BrowserRouter>
-          </WishlistProvider>
-        </NotifProvider>
-      </CartProvider>
+      <SiteProvider>
+        <CartProvider>
+          <NotifProvider>
+            <WishlistProvider>
+              <BrowserRouter>
+                <AppRoutes />
+                <Toaster />
+              </BrowserRouter>
+            </WishlistProvider>
+          </NotifProvider>
+        </CartProvider>
+      </SiteProvider>
     </AuthProvider>
   );
 }

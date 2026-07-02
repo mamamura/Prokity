@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../../lib/api';
-import { Plus, Pencil, Trash2, X, FolderTree } from 'lucide-react';
+import { Plus, Pencil, Trash2, X, FolderTree, Upload, Image as ImageIcon } from 'lucide-react';
 import { useToast } from '../../hooks/use-toast';
 
 const emptyCat = { slug: '', name: '', icon: 'Leaf', image: '' };
@@ -9,8 +9,18 @@ const CatForm = ({ initial, onClose, onSaved }) => {
   const { toast } = useToast();
   const [f, setF] = useState({ ...emptyCat, ...(initial || {}) });
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   const slugify = (s) => s.toLowerCase().trim().replace(/[^a-z0-9\s-]/g, '').replace(/[\s-]+/g, '-');
+
+  const onFile = async (e) => {
+    const file = e.target.files?.[0]; if (!file) return;
+    setUploading(true);
+    const reader = new FileReader();
+    reader.onload = () => { setF((s) => ({ ...s, image: reader.result })); setUploading(false); };
+    reader.onerror = () => { toast({ title: 'ছবি পড়া যায়নি', variant: 'destructive' }); setUploading(false); };
+    reader.readAsDataURL(file);
+  };
 
   const submit = async (e) => {
     e.preventDefault();
@@ -34,6 +44,24 @@ const CatForm = ({ initial, onClose, onSaved }) => {
           <button onClick={onClose} className="w-9 h-9 grid place-items-center rounded-full hover:bg-neutral-100"><X className="w-5 h-5" /></button>
         </div>
         <form onSubmit={submit} className="p-5 space-y-3">
+          {/* Image upload */}
+          <div>
+            <label className="text-[11px] font-semibold text-neutral-700 uppercase">Category image</label>
+            <div className="mt-1.5 flex items-center gap-3">
+              <div className="w-24 h-24 rounded-xl bg-neutral-50 border border-neutral-200 grid place-items-center overflow-hidden">
+                {f.image ? <img src={f.image} alt="" className="w-full h-full object-cover" /> : <ImageIcon className="w-6 h-6 text-neutral-400" />}
+              </div>
+              <div className="flex-1 space-y-2">
+                <label data-testid="cat-upload-btn" className="flex items-center gap-2 cursor-pointer px-3 py-2 rounded-lg bg-emerald-50 text-emerald-700 text-sm font-medium hover:bg-emerald-100 w-fit">
+                  <Upload className="w-4 h-4" /> {uploading ? 'Uploading…' : 'Upload image'}
+                  <input data-testid="cat-image-file" type="file" accept="image/*" onChange={onFile} className="hidden" />
+                </label>
+                {f.image && (
+                  <button type="button" onClick={() => setF({ ...f, image: '' })} className="inline-flex items-center gap-1 text-[11px] text-red-600 font-semibold"><X className="w-3 h-3" /> ছবি সরান</button>
+                )}
+              </div>
+            </div>
+          </div>
           <div>
             <label className="text-[11px] font-semibold text-neutral-700 uppercase">Name *</label>
             <input value={f.name} onChange={(e) => setF({ ...f, name: e.target.value, slug: f.slug || slugify(e.target.value) })} className="mt-1 w-full h-11 px-3 rounded-xl bg-neutral-50 border border-neutral-200 outline-none focus:border-emerald-500 text-sm" />
@@ -43,13 +71,9 @@ const CatForm = ({ initial, onClose, onSaved }) => {
             <input value={f.slug} onChange={(e) => setF({ ...f, slug: slugify(e.target.value) })} className="mt-1 w-full h-11 px-3 rounded-xl bg-neutral-50 border border-neutral-200 outline-none focus:border-emerald-500 text-sm" />
             <div className="text-[10.5px] text-neutral-500 mt-1">URL-friendly identifier (auto from name).</div>
           </div>
-          <div>
-            <label className="text-[11px] font-semibold text-neutral-700 uppercase">Image URL</label>
-            <input value={f.image || ''} onChange={(e) => setF({ ...f, image: e.target.value })} placeholder="https://…" className="mt-1 w-full h-11 px-3 rounded-xl bg-neutral-50 border border-neutral-200 outline-none focus:border-emerald-500 text-sm" />
-          </div>
           <div className="flex gap-2 pt-2">
             <button type="button" onClick={onClose} className="flex-1 h-11 rounded-full bg-neutral-100 text-neutral-700 font-semibold">Cancel</button>
-            <button disabled={saving} type="submit" className="flex-1 h-11 rounded-full bg-emerald-600 text-white font-semibold hover:bg-emerald-700 disabled:opacity-60">{saving ? 'Saving…' : (initial ? 'Save changes' : 'Create')}</button>
+            <button data-testid="cat-save-btn" disabled={saving} type="submit" className="flex-1 h-11 rounded-full bg-emerald-600 text-white font-semibold hover:bg-emerald-700 disabled:opacity-60">{saving ? 'Saving…' : (initial ? 'Save changes' : 'Create')}</button>
           </div>
         </form>
       </div>

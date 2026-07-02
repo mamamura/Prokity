@@ -34,7 +34,7 @@ const ProductCard = ({ product }) => {
 
   return (
     <Link to={`/product/${product.slug}`} className="product-card block rounded-2xl bg-white border border-neutral-100 overflow-hidden hover:border-emerald-200 hover:shadow-sm transition-all duration-200">
-      <div className="relative aspect-square bg-neutral-50 overflow-hidden">
+      <div className="relative aspect-square bg-transparent overflow-hidden">
         {product.discount ? (
           <span className="absolute top-2 left-2 z-10 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">-{product.discount}%</span>
         ) : null}
@@ -58,7 +58,7 @@ const ProductCard = ({ product }) => {
           alt={product.name}
           loading="lazy"
           onError={(e) => { e.currentTarget.src = `https://placehold.co/400x400/f5f5f5/525252?text=${encodeURIComponent(product.name.slice(0,16))}`; }}
-          className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+          className="w-full h-full object-contain transition-transform duration-300 hover:scale-105"
         />
       </div>
       <div className="p-2.5 space-y-1">

@@ -27,7 +27,6 @@ const AdminBanners = () => {
 
   const onImage = (e) => {
     const file = e.target.files?.[0]; if (!file) return;
-    if (file.size > 2 * 1024 * 1024) { toast({ title: 'Image too large (max 2 MB)', variant: 'destructive' }); return; }
     const r = new FileReader(); r.onload = () => setForm((s) => ({ ...s, image: r.result })); r.readAsDataURL(file);
   };
 

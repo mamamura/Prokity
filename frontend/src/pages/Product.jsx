@@ -86,9 +86,9 @@ const ProductPage = () => {
     <div className="pb-28 lg:pb-12">
       <MobileHeader title=" " back />
       <div className="max-w-7xl mx-auto lg:px-6 lg:py-8 lg:grid lg:grid-cols-2 lg:gap-10">
-        <div className="relative aspect-square bg-neutral-50 lg:rounded-3xl lg:overflow-hidden">
+        <div className="relative aspect-square bg-transparent lg:rounded-3xl lg:overflow-hidden">
           {outOfStock && (<div className="absolute inset-0 grid place-items-center bg-white/70 backdrop-blur-[2px] z-10"><span className="bg-neutral-900 text-white text-[12px] font-bold uppercase tracking-wider px-4 py-1.5 rounded-full">স্টকে নেই</span></div>)}
-          <img src={p.image} alt={p.name} onError={(e) => { e.currentTarget.src = `https://placehold.co/600/f5f5f5/525252?text=${encodeURIComponent(p.name.slice(0,16))}`; }} className="w-full h-full object-cover" />
+          <img src={p.image} alt={p.name} onError={(e) => { e.currentTarget.src = `https://placehold.co/600/f5f5f5/525252?text=${encodeURIComponent(p.name.slice(0,16))}`; }} className="w-full h-full object-contain" />
           <div className="absolute top-3 right-3 flex items-center gap-1.5">
             <button onClick={share} aria-label="Share" data-testid="product-share-btn" className="w-9 h-9 grid place-items-center rounded-full bg-white/85 backdrop-blur shadow-sm hover:bg-white transition-colors text-neutral-700"><Share2 className="w-4 h-4" /></button>
             <button onClick={heart} aria-label={liked ? 'Remove from wishlist' : 'Add to wishlist'} data-testid="product-wishlist-btn" className={`w-9 h-9 grid place-items-center rounded-full bg-white/85 backdrop-blur shadow-sm hover:bg-white transition-colors ${liked ? 'text-red-500' : 'text-neutral-700 hover:text-red-500'}`}><Heart className={`w-4 h-4 ${liked ? 'fill-current' : ''}`} /></button>

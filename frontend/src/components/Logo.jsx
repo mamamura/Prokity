@@ -1,10 +1,13 @@
 import React from 'react';
+import { useSite } from '../contexts/SiteContext';
 
 /**
- * Brand logo component. Renders the প্রকৃতির ঘ্রাণ circular badge from /logo.png.
- * Sizes — sm: 32px, md: 40px, lg: 56px, xl: 80px, xxl: 120px (mobile-friendly defaults).
+ * Brand logo component. Uses admin-uploaded logoUrl if available,
+ * otherwise falls back to /logo.png. Sizes tuned for mobile-first UI.
  */
 const Logo = ({ size = 'md', className = '', ring = false, ...props }) => {
+  const site = useSite();
+  const src = site?.logoUrl || '/logo.png';
   const dim = {
     xs: 'w-7 h-7',
     sm: 'w-8 h-8',
@@ -15,9 +18,10 @@ const Logo = ({ size = 'md', className = '', ring = false, ...props }) => {
   }[size] || 'w-10 h-10';
   return (
     <img
-      src="/logo.png"
-      alt="প্রকৃতির ঘ্রাণ"
+      src={src}
+      alt={site?.siteName || 'প্রকৃতির ঘ্রাণ'}
       data-testid="brand-logo"
+      onError={(e) => { if (e.currentTarget.src !== window.location.origin + '/logo.png') e.currentTarget.src = '/logo.png'; }}
       className={`${dim} object-contain rounded-full ${ring ? 'ring-2 ring-white shadow-sm' : ''} ${className}`}
       {...props}
     />

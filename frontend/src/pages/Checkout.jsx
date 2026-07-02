@@ -213,7 +213,7 @@ const Checkout = () => {
             <div>অর্ডার নম্বর <span className="font-mono font-bold">{order.orderNo}</span> ও আপনার মোবাইল নম্বর দিয়ে যেকোনো সময় ট্র্যাক করতে পারবেন।</div>
           </div>
 
-          <Link data-testid="checkout-receipt-btn" to={`/receipt/${order.orderNo}?phone=${encodeURIComponent(orderPhone)}`} target="_blank" className="mt-5 w-full inline-flex items-center justify-center gap-1.5 h-12 rounded-full bg-emerald-700 text-white font-semibold hover:bg-emerald-800 transition-colors">
+          <Link data-testid="checkout-receipt-btn" to={`/receipt/${order.orderNo}?phone=${encodeURIComponent(orderPhone)}`} className="mt-5 w-full inline-flex items-center justify-center gap-1.5 h-12 rounded-full bg-emerald-700 text-white font-semibold hover:bg-emerald-800 transition-colors">
             <Download className="w-4 h-4" /> পিডিএফ রসিদ ডাউনলোড
           </Link>
           <Link data-testid="checkout-track-btn" to={`/track?orderNo=${order.orderNo}&phone=${encodeURIComponent(orderPhone)}`} className="mt-2 w-full inline-flex items-center justify-center gap-1.5 h-11 rounded-full bg-white border border-emerald-700 text-emerald-700 font-semibold hover:bg-emerald-50 transition-colors">

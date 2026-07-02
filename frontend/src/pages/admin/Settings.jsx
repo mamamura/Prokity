@@ -1,20 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../../lib/api';
 import { useToast } from '../../hooks/use-toast';
-import { Save, Smartphone, Wallet, Info, Globe, Truck, Building2, MessageCircle as MC, Percent, Tag } from 'lucide-react';
+import { Save, Smartphone, Wallet, Info, Globe, Truck, Building2, MessageCircle as MC, Percent, Tag, Palette, Upload, Image as ImageIcon, X, ToggleRight } from 'lucide-react';
 
 const tabs = [
+  { key: 'branding', label: 'Branding', icon: Palette },
   { key: 'payment', label: 'Payment', icon: Wallet },
   { key: 'site', label: 'Site info', icon: Globe },
   { key: 'delivery', label: 'Delivery', icon: Truck },
   { key: 'pricing', label: 'Pricing', icon: Percent },
+  { key: 'features', label: 'Features', icon: ToggleRight },
 ];
 
 const AdminSettings = () => {
   const { toast } = useToast();
-  const [tab, setTab] = useState('payment');
+  const [tab, setTab] = useState('branding');
   const [p, setP] = useState({ bkashNumber: '', nagadNumber: '', bkashType: 'personal', nagadType: 'personal', instructions: '' });
-  const [s, setS] = useState({ siteName: '', tagline: '', contactPhone: '', contactEmail: '', contactAddress: '', facebookUrl: '', instagramUrl: '', whatsappNumber: '', deliveryFee: 60, freeDeliveryAbove: 500, aboutText: '', globalDiscountPercent: 0, globalDiscountLabel: '', taxPercent: 0, minOrderAmount: 0 });
+  const [s, setS] = useState({ siteName: '', tagline: '', contactPhone: '', contactEmail: '', contactAddress: '', facebookUrl: '', instagramUrl: '', whatsappNumber: '', deliveryFee: 60, freeDeliveryAbove: 500, aboutText: '', globalDiscountPercent: 0, globalDiscountLabel: '', taxPercent: 0, minOrderAmount: 0, logoUrl: '', brandColor: '#047857', brandColorDark: '#065f46', showChatWidget: true, showTracker: true, showNewsletter: true });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -42,6 +44,11 @@ const AdminSettings = () => {
     try { await api.put('/admin/settings/site', s); toast({ title: 'Site settings updated' }); }
     catch (e) { toast({ title: 'Save failed', description: e.response?.data?.detail || 'Try again', variant: 'destructive' }); }
     finally { setSaving(false); }
+  };
+
+  const onLogoFile = (e) => {
+    const file = e.target.files?.[0]; if (!file) return;
+    const r = new FileReader(); r.onload = () => setS((x) => ({ ...x, logoUrl: r.result })); r.readAsDataURL(file);
   };
 
   if (loading) return (<div className="p-10 text-center text-sm text-neutral-500">Loading settings…</div>);
@@ -192,6 +199,99 @@ const AdminSettings = () => {
           </button>
         </form>
       )}
+      {tab === 'branding' && (
+        <form onSubmit={saveSite} className="max-w-2xl space-y-4">
+          <div className="rounded-2xl bg-white border border-neutral-100 p-4 md:p-5">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-9 h-9 rounded-lg bg-emerald-700 grid place-items-center"><ImageIcon className="w-4 h-4 text-white" /></div>
+              <div>
+                <div className="font-extrabold text-sm">সাইট লোগো</div>
+                <div className="text-[10.5px] text-neutral-500">সব হেডার, লগইন পেজ ও রসিদে ব্যবহৃত হবে।</div>
+              </div>
+            </div>
+            <div className="flex items-center gap-4">
+              <div className="w-24 h-24 rounded-2xl bg-neutral-50 border border-neutral-200 grid place-items-center overflow-hidden">
+                {s.logoUrl ? <img src={s.logoUrl} alt="" className="w-full h-full object-contain" /> : <img src="/logo.png" alt="default" className="w-full h-full object-contain opacity-60" />}
+              </div>
+              <div className="flex-1 space-y-2">
+                <label data-testid="settings-logo-upload" className="inline-flex items-center gap-2 cursor-pointer px-3 py-2 rounded-lg bg-emerald-50 text-emerald-700 text-sm font-medium hover:bg-emerald-100 w-fit">
+                  <Upload className="w-4 h-4" /> নতুন লোগো আপলোড
+                  <input data-testid="settings-logo-file" type="file" accept="image/*" onChange={onLogoFile} className="hidden" />
+                </label>
+                {s.logoUrl && (
+                  <button type="button" onClick={() => setS({ ...s, logoUrl: '' })} className="ml-2 inline-flex items-center gap-1 text-[11px] text-red-600 font-semibold"><X className="w-3 h-3" /> ডিফল্ট লোগো ব্যবহার</button>
+                )}
+                <div className="text-[10.5px] text-neutral-500">বর্গাকৃতি PNG/JPG। রাউন্ড ক্রপ হয়।</div>
+              </div>
+            </div>
+          </div>
+
+          <div className="rounded-2xl bg-white border border-neutral-100 p-4 md:p-5">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-9 h-9 rounded-lg bg-fuchsia-600 grid place-items-center"><Palette className="w-4 h-4 text-white" /></div>
+              <div>
+                <div className="font-extrabold text-sm">থিম রঙ</div>
+                <div className="text-[10.5px] text-neutral-500">ব্র্যান্ড রঙ সিএসএস ভ্যারিয়েবল হিসেবে প্রয়োগ হয় (var(--brand))।</div>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div>
+                <label className="text-[10.5px] uppercase tracking-wider font-semibold text-neutral-600">Primary color</label>
+                <div className="mt-1 flex items-center gap-2">
+                  <input data-testid="settings-brand-color" type="color" value={s.brandColor} onChange={(e) => setS({ ...s, brandColor: e.target.value })} className="w-14 h-11 rounded-lg border border-neutral-200 cursor-pointer" />
+                  <input value={s.brandColor} onChange={(e) => setS({ ...s, brandColor: e.target.value })} className="flex-1 h-11 px-3 rounded-xl bg-neutral-50 border border-neutral-200 outline-none focus:border-emerald-500 text-sm font-mono" />
+                </div>
+              </div>
+              <div>
+                <label className="text-[10.5px] uppercase tracking-wider font-semibold text-neutral-600">Primary color — dark shade</label>
+                <div className="mt-1 flex items-center gap-2">
+                  <input type="color" value={s.brandColorDark} onChange={(e) => setS({ ...s, brandColorDark: e.target.value })} className="w-14 h-11 rounded-lg border border-neutral-200 cursor-pointer" />
+                  <input value={s.brandColorDark} onChange={(e) => setS({ ...s, brandColorDark: e.target.value })} className="flex-1 h-11 px-3 rounded-xl bg-neutral-50 border border-neutral-200 outline-none focus:border-emerald-500 text-sm font-mono" />
+                </div>
+              </div>
+            </div>
+            <div className="mt-3 text-[11px] text-neutral-500 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+              <span className="font-bold">নোট:</span> বেশিরভাগ কম্পোনেন্টে বর্তমানে ইমারাল্ড টেইলউইন্ড ক্লাস হার্ড-কোডেড আছে। ভবিষ্যৎ আপডেটে সম্পূর্ণ থিম কালার-শিফট আসবে।
+            </div>
+          </div>
+
+          <button data-testid="settings-branding-save" disabled={saving} type="submit" className="w-full md:w-auto px-6 h-12 rounded-full bg-emerald-700 text-white font-semibold hover:bg-emerald-800 disabled:opacity-60 inline-flex items-center justify-center gap-2 transition-colors">
+            <Save className="w-4 h-4" /> {saving ? 'Saving…' : 'Save branding'}
+          </button>
+        </form>
+      )}
+
+      {tab === 'features' && (
+        <form onSubmit={saveSite} className="max-w-2xl space-y-3">
+          <div className="rounded-2xl bg-white border border-neutral-100 p-4 md:p-5 space-y-3">
+            <div className="flex items-center gap-2 mb-1">
+              <div className="w-9 h-9 rounded-lg bg-cyan-600 grid place-items-center"><ToggleRight className="w-4 h-4 text-white" /></div>
+              <div>
+                <div className="font-extrabold text-sm">ফিচার নিয়ন্ত্রণ</div>
+                <div className="text-[10.5px] text-neutral-500">সাইটের কোন ফিচার চালু/বন্ধ থাকবে সেটি এখান থেকে ঠিক করুন।</div>
+              </div>
+            </div>
+
+            {[
+              { key: 'showChatWidget', title: 'চ্যাট উইজেট', desc: 'হোমপেজের ডান-নিচের সাপোর্ট চ্যাট বাটন' },
+              { key: 'showTracker', title: 'হোমপেজ অর্ডার ট্র্যাকার কার্ড', desc: 'হোমপেজে অর্ডার ট্র্যাক করার বড় কার্ড' },
+              { key: 'showNewsletter', title: 'নিউজলেটার সাবস্ক্রিপশন', desc: 'হোমপেজের নিচের নিউজলেটার সেকশন' },
+            ].map((it) => (
+              <label key={it.key} className="flex items-center justify-between gap-3 py-2 border-t border-neutral-100 first:border-t-0 cursor-pointer">
+                <div className="flex-1">
+                  <div className="text-[13px] font-bold text-neutral-900">{it.title}</div>
+                  <div className="text-[11px] text-neutral-500">{it.desc}</div>
+                </div>
+                <input data-testid={`settings-feature-${it.key}`} type="checkbox" checked={!!s[it.key]} onChange={(e) => setS({ ...s, [it.key]: e.target.checked })} className="w-11 h-6 relative appearance-none rounded-full bg-neutral-300 checked:bg-emerald-600 transition-colors cursor-pointer before:absolute before:top-0.5 before:left-0.5 before:w-5 before:h-5 before:rounded-full before:bg-white before:transition-transform checked:before:translate-x-5" />
+              </label>
+            ))}
+          </div>
+          <button disabled={saving} type="submit" className="w-full md:w-auto px-6 h-12 rounded-full bg-emerald-700 text-white font-semibold hover:bg-emerald-800 disabled:opacity-60 inline-flex items-center justify-center gap-2 transition-colors">
+            <Save className="w-4 h-4" /> {saving ? 'Saving…' : 'Save features'}
+          </button>
+        </form>
+      )}
+
       {tab === 'pricing' && (
         <form onSubmit={saveSite} className="max-w-2xl space-y-4">
           <div className="rounded-2xl bg-white border border-neutral-100 p-4 md:p-5">
