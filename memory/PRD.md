@@ -54,33 +54,37 @@ User language: **Bengali (বাংলা)** — agent responds in Bengali.
 ### Iteration 1–2 (carry-over)
 - Catalog, cart, search, product details, admin panel, payment manual flow (bKash/Nagad), coupons.
 
-### Iteration 3 — current session (Feb 2026)
-- **Guest checkout** — backend `POST /api/orders` accepts unauthenticated requests; sets `user_id=null`.
-- **Public order tracking** — `GET /api/orders/track/{orderNo}?phone=...` with phone match; wrong phone rejects.
-- **Receipt page** — `/receipt/:orderNo?phone=...` renders a Bengali printable invoice; **PDF via browser print** (`window.print()`) with print stylesheet for clean output.
-- **Login/Signup hint** — Visible banner on `/checkout` for guests with `লগইন` + `সাইনআপ` buttons.
-- **LocalStorage guest orders** — On guest checkout success, orderNo+phone saved to `os_guest_orders`. Profile page (guest mode) lists these with `ট্র্যাক` buttons.
-- **Profile guest mode** — "গেস্ট অপশন" section with `/track` link + guest-orders list.
-- **Admin pricing controls** — New `Pricing` tab in admin Settings:
-  - Global Discount % (applies to cart subtotal)
-  - Promo label (shown as banner in cart/checkout)
-  - VAT/Tax %
-  - Minimum order amount
-- **CartContext** auto-fetches `/settings/site`, applies `siteDiscount`, `tax`, `delivery` reactively.
-- **Bengali UI** — Translated: Home, Cart, Checkout, Track, Receipt, Profile, Auth (login/signup), Search, Categories, Product, Wishlist, Orders, Notifications, EditProfile, Addresses, ChatWidget, BottomNav, MobileHeader, DesktopNav.
-- **Protected routes** still gated: `/wishlist`, `/notifications`, `/messages`, `/orders`, `/profile/addresses`, `/profile/edit` — redirect to `/login`.
-- **Admin login** — unchanged at `/portal-7x9k2m4p8q3z6n1v`.
+### Iteration 3 (Feb 2026) — Guest checkout + Bengali
+- Guest checkout (no login), public tracking, PDF receipt page, LocalStorage guest orders, Login/Signup hint, admin pricing controls, Bengali UI across all pages.
+
+### Iteration 4 (Feb 2026) — Branding
+- Custom logo everywhere (mobile header replaced login greeting), home Order Tracker card, jsPDF+html2canvas true PDF download, favicon.
+
+### Iteration 5 (Feb 2026) — Full admin control + de-branding
+- **"Made with Emergent" badge + posthog + emergent scripts REMOVED** from `public/index.html` — no trace site-wide.
+- **Admin Branding tab** (default): upload site logo, brand color pickers (primary + dark), applied as `--brand` CSS variable.
+- **Admin Features tab**: toggle Chat widget, Home Order Tracker card, Newsletter section on/off.
+- **Category image upload**: file upload replaces URL input in admin.
+- **Product image upload**: 2 MB size hint + URL fallback removed; unlimited (subject to Mongo 16MB doc limit).
+- **Product unit dropdown**: Bengali presets — ওজন (১০০ গ্রাম … ১০ কেজি), তরল (১০০ মিলি … ৫ লিটার), পিস (১ পিস … ১ ডজন), plus "🖋 কাস্টম" free-text option.
+- **Product images transparent + object-contain** on cards & detail — images blend with page background.
+- **PDF links stay in same tab** (`target="_blank"` removed from Track & Checkout receipt links).
+- **SiteContext** provides logo, brand color, feature toggles globally to every page.
 
 ## Test Results
-- **Iteration 3**: 15/15 backend pytest passed (`/app/backend/tests/test_guest_checkout.py`); full frontend E2E green.
-- See `/app/test_reports/iteration_3.json`.
+- **Iteration 5**: Backend 5/5 pytest passed; frontend 100%. See `/app/test_reports/iteration_5.json`.
+- **Iteration 4**: 100% (logo + tracker + PDF).
+- **Iteration 3**: 15/15 backend + full frontend green.
 
 ## Backlog / P1+
-- Split `server.py` into routers (orders / settings / admin / auth) for maintainability.
-- Validate Bangladeshi phone format on guest checkout (e.g. `^01[3-9]\d{8}$`).
+- **Settings.jsx refactor** — 350+ lines, 6 tabs — split into `BrandingTab.jsx`, `PaymentTab.jsx` etc.
+- **Server-side image cap** — reject > 500KB base64 or migrate to `/api/uploads` static hosting to avoid Mongo 16MB doc limit.
+- **SiteContext live refresh** — currently admin brand-color/logo change requires hard reload; add auto-refresh or optimistic mutation.
+- **Full theme cascade** — most `emerald-*` Tailwind classes still hard-coded; brand color CSS variable only affects components that read it explicitly.
+- Split `server.py` into routers (`orders/`, `settings/`, `admin/`, `auth/`) for maintainability.
+- Validate Bangladeshi phone format on guest checkout (`^01[3-9]\d{8}$`).
 - Rate-limit `/api/orders/track` to prevent enumeration.
-- Add admin-controlled `bnText` content per category for full localization of DB-driven content.
-- Email/SMS notification on order confirmation (using contactPhone in settings).
+- Email/SMS notification on order confirmation.
 - Optional: provide a fallback "Continue as guest" button below the Login page.
 
 ## Files of Reference
