@@ -578,7 +578,7 @@ async def admin_send(body: AdminMessageCreate, admin = Depends(get_admin)):
     await db.messages.insert_one(msg)
     msg.pop('_id', None)
     # Notify the user
-    await push_notification(body.userId, 'New reply from support', body.text.strip()[:120], 'system')
+    await push_notification(body.userId, 'সাপোর্ট থেকে নতুন উত্তর', body.text.strip()[:120], 'system')
     return msg
 
 @api.get('/admin/messages-unread-count')
@@ -1146,14 +1146,27 @@ async def admin_update_order(order_id: str, body: OrderStatusUpdate, admin = Dep
     history = o.get('statusHistory', []) or []
     history.append({'status': body.status, 'at': datetime.utcnow().isoformat(), 'by': admin['name']})
     await db.orders.update_one({'id': order_id}, {'$set': {'status': body.status, 'statusHistory': history}})
-    status_msgs = {
-        'confirmed': 'has been confirmed. Preparing for dispatch.',
-        'shipped': 'is on the way! Track from your orders.',
-        'delivered': 'has been delivered. Enjoy your organic goodies!',
-        'cancelled': 'has been cancelled. Please contact support if this was a mistake.',
-        'pending': 'is pending review.',
+    status_titles_bn = {
+        'confirmed': 'অর্ডার কনফার্ম হয়েছে',
+        'shipped': 'অর্ডার পাঠানো হয়েছে',
+        'delivered': 'অর্ডার ডেলিভার হয়েছে',
+        'cancelled': 'অর্ডার বাতিল হয়েছে',
+        'pending': 'অর্ডার রিভিউতে রয়েছে',
     }
-    await push_notification(o['userId'], f"Order {body.status} · {o['orderNo']}", f"Your order {status_msgs.get(body.status, '')}", 'order', order_id)
+    status_msgs_bn = {
+        'confirmed': f"আপনার অর্ডার {o['orderNo']} কনফার্ম করা হয়েছে। শীঘ্রই প্রস্তুত করে পাঠানো হবে।",
+        'shipped': f"আপনার অর্ডার {o['orderNo']} পথে রয়েছে! 'আমার অর্ডার' থেকে ট্র্যাক করুন।",
+        'delivered': f"আপনার অর্ডার {o['orderNo']} সফলভাবে ডেলিভার হয়েছে। ধন্যবাদ 🌱",
+        'cancelled': f"আপনার অর্ডার {o['orderNo']} বাতিল করা হয়েছে। কোনো প্রশ্ন থাকলে সাপোর্টে যোগাযোগ করুন।",
+        'pending': f"আপনার অর্ডার {o['orderNo']} পুনরায় রিভিউতে রয়েছে।",
+    }
+    await push_notification(
+        o['userId'],
+        status_titles_bn.get(body.status, f"অর্ডার আপডেট · {o['orderNo']}"),
+        status_msgs_bn.get(body.status, ''),
+        'order',
+        order_id,
+    )
     o = await db.orders.find_one({'id': order_id}); o.pop('_id', None)
     return o
 

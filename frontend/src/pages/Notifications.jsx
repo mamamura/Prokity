@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Bell, Check, Package, Gift, AlertCircle, CheckCheck } from 'lucide-react';
 import { useNotifications } from '../contexts/NotifContext';
 import { useAuth } from '../contexts/AuthContext';
@@ -27,6 +27,17 @@ const timeAgo = (iso) => {
 const NotificationsPage = () => {
   const { user } = useAuth();
   const { items, loading, markRead, markAllRead, unread, refresh } = useNotifications();
+  const navigate = useNavigate();
+
+  const handleClick = async (n) => {
+    if (!n.read) await markRead(n.id);
+    // Order notifications open the order detail page; support/system stay on the list.
+    if (n.orderId) {
+      navigate(`/order/${n.orderId}`);
+    } else if (n.type === 'system' && (n.title || '').includes('সাপোর্ট')) {
+      navigate('/messages');
+    }
+  };
 
   // When user views the notifications page, mark all as read so badge clears
   React.useEffect(() => {
@@ -83,11 +94,13 @@ const NotificationsPage = () => {
         ) : items.map((n) => {
           const Icon = typeIcon[n.type] || Bell;
           const color = typeColor[n.type] || typeColor.system;
+          const clickable = !!n.orderId || (n.type === 'system' && (n.title || '').includes('সাপোর্ট'));
           return (
             <button
               key={n.id}
-              onClick={() => !n.read && markRead(n.id)}
-              className={`w-full text-left rounded-2xl border p-3 flex items-start gap-3 transition-colors ${n.read ? 'bg-white border-neutral-100' : 'bg-emerald-50/50 border-emerald-200'}`}
+              data-testid={`notif-item-${n.id}`}
+              onClick={() => handleClick(n)}
+              className={`w-full text-left rounded-2xl border p-3 flex items-start gap-3 transition-colors ${n.read ? 'bg-white border-neutral-100' : 'bg-emerald-50/50 border-emerald-200'} ${clickable ? 'hover:bg-emerald-50 cursor-pointer' : ''}`}
             >
               <div className={`w-10 h-10 rounded-xl grid place-items-center shrink-0 ${color}`}>
                 <Icon className="w-4 h-4" />
@@ -98,7 +111,10 @@ const NotificationsPage = () => {
                   {!n.read && <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0 mt-1.5" />}
                 </div>
                 <div className="text-[12.5px] text-neutral-600 mt-1 leading-snug">{n.body}</div>
-                <div className="text-[11px] text-neutral-400 mt-1.5">{timeAgo(n.createdAt)}</div>
+                <div className="flex items-center justify-between mt-1.5">
+                  <div className="text-[11px] text-neutral-400">{timeAgo(n.createdAt)}</div>
+                  {clickable && <div className="text-[11px] font-semibold text-emerald-700">বিস্তারিত দেখুন →</div>}
+                </div>
               </div>
             </button>
           );

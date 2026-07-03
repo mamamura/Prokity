@@ -1,0 +1,39 @@
+{
+  "summary": "Iteration 9 — validated Bengali order notifications, notification-click → order detail navigation, admin order card per-status color backgrounds, and regressions (guest order skip, mark-read/mark-all-read, anti-copy on storefront/opt-out on admin). All 7 backend pytest cases pass; all 3 frontend flows pass end-to-end.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_iteration9_notifications.py",
+    "/app/test_reports/pytest/iteration9.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "server.py:1163 — admin_update_order calls push_notification(o['userId'], ...) unconditionally. For guest orders (userId=None) push_notification will broadcast the Bengali status update to ALL customers (see push_notification line 383-385). Recommend guarding with `if o.get('userId'):` similar to order-creation guard at line 1094. Not covered by the current test-set but a real regression risk if an admin updates a guest order's status.",
+    "Notifications.jsx:43-47 — visiting /notifications auto-triggers markAllRead(), which means the 'clicked notif becomes read' behavior is trivially satisfied (all become read on page mount). Consider removing the blanket markAllRead on mount so per-item read state is meaningful (or keep and document).",
+    "admin/Orders.jsx overall LGTM — data-testid, cardBg mapping, and status badge all wired correctly."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_iteration9_notifications.py (new)"
+  ],
+  "success_rate": {"backend": "100% (7/7)", "frontend": "100% (3/3 flows)"},
+  "test_credentials": "admin@organicshop.com / admin123 at /portal-7x9k2m4p8q3z6n1v. New TEST_ customers created dynamically per run.",
+  "seed_data_creation": "Each backend test run signs up TEST_notif_<uuid>@example.com and places a COD order. Frontend test signs up TEST_uinotif2_<epoch>@example.com. All prefixed TEST_ for cleanup.",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Bengali status notification titles/bodies exercised: confirmed/shipped/delivered/cancelled. Anti-copy: prevented=True on /notifications and /order/{id}, prevented=False on /portal-.../orders (correct). Admin order cards for all 5 statuses were present in DB and their className tokens (border-l-{color}-500/600) verified programmatically. Beware guest broadcast issue noted in code review before any test that PATCHes a guest order's status.",
+  "verification_details": {
+    "test1_bengali_notifications": "PASS — titles 'অর্ডার কনফার্ম হয়েছে','অর্ডার পাঠানো হয়েছে','অর্ডার ডেলিভার হয়েছে','অর্ডার বাতিল হয়েছে' + body fragments 'কনফার্ম করা হয়েছে','পথে রয়েছে','সফলভাবে ডেলিভার হয়েছে','বাতিল' all present with type='order' and orderId set.",
+    "test2_click_navigation": "PASS — notif-item card has 'বিস্তারিত দেখুন →' label; clicking navigates to /order/{id} and OrderDetail renders with tracking + items.",
+    "test3_admin_card_colors": "PASS — pending→border-l-amber-500, confirmed→border-l-blue-500, shipped→border-l-violet-500, delivered→border-l-emerald-600, cancelled→border-l-red-500. Uppercase status badge next to orderNo verified visually.",
+    "test4_unread_count_regression": "PASS — POST /notifications/{id}/read decrements unread-count by 1; POST /notifications/read-all zeroes it.",
+    "test5_guest_no_notification": "PASS — guest order (no auth) returns 200 with orderNo and no user notification is created (confirmed via customer_order test's separate userId).",
+    "test6_anticopy": "PASS — contextmenu defaultPrevented=True on /notifications and /order/{id}; False on /portal-7x9k2m4p8q3z6n1v/orders."
+  }
+}

@@ -11,6 +11,15 @@ const colors = {
   delivered: 'bg-emerald-50 text-emerald-700 border-emerald-200',
   cancelled: 'bg-red-50 text-red-700 border-red-200',
 };
+// Per-order card background — helps admin visually separate one order from the next
+// at a glance. Each status has its own tint + left accent stripe.
+const cardBg = {
+  pending: 'bg-amber-50/60 border-amber-200 border-l-4 border-l-amber-500',
+  confirmed: 'bg-blue-50/60 border-blue-200 border-l-4 border-l-blue-500',
+  shipped: 'bg-violet-50/60 border-violet-200 border-l-4 border-l-violet-500',
+  delivered: 'bg-emerald-50/60 border-emerald-200 border-l-4 border-l-emerald-600',
+  cancelled: 'bg-red-50/60 border-red-200 border-l-4 border-l-red-500',
+};
 const payColors = {
   paid: 'bg-emerald-100 text-emerald-700',
   pending: 'bg-amber-100 text-amber-700',
@@ -73,10 +82,13 @@ const AdminOrders = () => {
         {loading ? <div className="p-8 text-center text-sm text-neutral-500">Loading…</div> : filtered.length === 0 ? (
           <div className="rounded-2xl border border-neutral-100 bg-white p-10 text-center text-sm text-neutral-500">No orders here.</div>
         ) : filtered.map((o) => (
-          <div key={o.id} className="rounded-2xl bg-white border border-neutral-100 p-4">
+          <div key={o.id} data-testid={`admin-order-card-${o.id}`} className={`rounded-2xl border p-4 shadow-sm transition-shadow hover:shadow-md ${cardBg[o.status] || 'bg-white border-neutral-100'}`}>
             <div className="flex items-start justify-between gap-3 flex-wrap">
               <div>
-                <div className="font-mono text-xs text-neutral-500">{o.orderNo}</div>
+                <div className="flex items-center gap-2">
+                  <div className="font-mono text-xs text-neutral-500">{o.orderNo}</div>
+                  <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full border ${colors[o.status]}`}>{o.status}</span>
+                </div>
                 <div className="font-extrabold mt-0.5">{o.userName} <span className="text-xs font-normal text-neutral-500">· {o.userPhone}</span></div>
                 <div className="text-[11.5px] text-neutral-500 mt-0.5">{new Date(o.createdAt).toLocaleString()}</div>
               </div>
@@ -119,13 +131,13 @@ const AdminOrders = () => {
             )}
 
             <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3">
-              <div className="rounded-xl bg-neutral-50 p-3 text-xs">
+              <div className="rounded-xl bg-white/80 border border-white p-3 text-xs">
                 <div className="font-semibold text-neutral-700 mb-1">Delivery</div>
                 <div className="text-neutral-600">{o.address.fullName}, {o.address.phone}</div>
                 <div className="text-neutral-600">{o.address.address}, {o.address.area}, {o.address.city}</div>
                 {o.address.note && <div className="text-neutral-500 mt-1 italic">Note: {o.address.note}</div>}
               </div>
-              <div className="rounded-xl bg-neutral-50 p-3 text-xs">
+              <div className="rounded-xl bg-white/80 border border-white p-3 text-xs">
                 <div className="font-semibold text-neutral-700 mb-1">Items ({o.items.length})</div>
                 <ul className="space-y-0.5 max-h-28 overflow-auto">
                   {o.items.map((it, i) => (<li key={i} className="flex justify-between"><span className="truncate pr-2">{it.qty}× {it.name}</span><span className="shrink-0">৳{formatBDT(it.price * it.qty)}</span></li>))}
