@@ -71,7 +71,22 @@ User language: **Bengali (বাংলা)** — agent responds in Bengali.
 - **PDF links stay in same tab** (`target="_blank"` removed from Track & Checkout receipt links).
 - **SiteContext** provides logo, brand color, feature toggles globally to every page.
 
+### Iteration 6–7 (Feb 2026) — Variants, gallery, themes, delivery zones
+- Product variants (label/price/oldPrice/stock) — customer picks size/weight on product page.
+- Multiple product images with gallery/thumbnail swap.
+- 10-theme preset picker in admin Settings → Branding.
+- Admin-controlled delivery zones (name, fee, freeAbove) + outside-zone fee.
+- Client-side image compression before upload (`/app/frontend/src/lib/image.js`).
+
+### Iteration 8 (Feb 2026) — Cybersecurity hardening
+- **Frontend anti-theft** (`public/index.html`): storefront blocks contextmenu, dragstart, selectstart, copy, cut and Ctrl+S / Ctrl+U keyboard shortcuts. Body-level CSS `user-select: none`, `user-drag: none`. Form inputs/textareas remain fully functional. Admin panel opts out via `document.body.dataset.admin='1'` (set by AdminLayout).
+- **Backend SecurityHeadersMiddleware** (`server.py`): every response carries X-Content-Type-Options, X-Frame-Options: DENY, Referrer-Policy, Permissions-Policy (camera/mic/geo off), HSTS 1 year, Cross-Origin-Resource-Policy: same-site, X-XSS-Protection. `/api/*` responses additionally get X-Robots-Tag noindex + Cache-Control no-store.
+- **Rate limiting** (slowapi): login 10/min, signup 5/min, forgot 5/min, reset 5/min, orders 30/min, public order tracking 20/min. Excess returns 429 with a Bengali-friendly message.
+- **False "Save failed" toast fix** in admin/Settings.jsx — `refresh()` moved outside the try/catch so its rejection cannot trigger the destructive toast when the save itself succeeded.
+
 ## Test Results
+- **Iteration 8**: Backend 7/7 pass (headers + all rate limits verified); Frontend 100% (anti-theft on storefront, admin opt-out, Ctrl+P allowed on /receipt, Settings save regression fixed). See `/app/test_reports/iteration_8.json`.
+- **Iteration 7**: Backend 5/5; Frontend variant/gallery/theme/zones green; only issue = false "Save failed" toast (now fixed in it. 8).
 - **Iteration 5**: Backend 5/5 pytest passed; frontend 100%. See `/app/test_reports/iteration_5.json`.
 - **Iteration 4**: 100% (logo + tracker + PDF).
 - **Iteration 3**: 15/15 backend + full frontend green.
