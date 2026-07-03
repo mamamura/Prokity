@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { api } from '../../lib/api';
 import { useToast } from '../../hooks/use-toast';
 import { THEMES } from '../../lib/themes';
-import { Save, Smartphone, Wallet, Info, Globe, Truck, Building2, MessageCircle as MC, Percent, Tag, Palette, Upload, Image as ImageIcon, X, ToggleRight, Check } from 'lucide-react';
+import { Save, Smartphone, Wallet, Info, Globe, Truck, Building2, MessageCircle as MC, Percent, Tag, Palette, Upload, Image as ImageIcon, X, ToggleRight, Check, Plus } from 'lucide-react';
 
 const tabs = [
   { key: 'branding', label: 'Branding', icon: Palette },
@@ -17,7 +17,7 @@ const AdminSettings = () => {
   const { toast } = useToast();
   const [tab, setTab] = useState('branding');
   const [p, setP] = useState({ bkashNumber: '', nagadNumber: '', bkashType: 'personal', nagadType: 'personal', instructions: '' });
-  const [s, setS] = useState({ siteName: '', tagline: '', contactPhone: '', contactEmail: '', contactAddress: '', facebookUrl: '', instagramUrl: '', whatsappNumber: '', deliveryFee: 60, freeDeliveryAbove: 500, aboutText: '', globalDiscountPercent: 0, globalDiscountLabel: '', taxPercent: 0, minOrderAmount: 0, logoUrl: '', brandColor: '#047857', brandColorDark: '#065f46', showChatWidget: true, showTracker: true, showNewsletter: true });
+  const [s, setS] = useState({ siteName: '', tagline: '', contactPhone: '', contactEmail: '', contactAddress: '', facebookUrl: '', instagramUrl: '', whatsappNumber: '', deliveryFee: 60, freeDeliveryAbove: 500, aboutText: '', globalDiscountPercent: 0, globalDiscountLabel: '', taxPercent: 0, minOrderAmount: 0, logoUrl: '', brandColor: '#047857', brandColorDark: '#065f46', themeId: 'emerald', showChatWidget: true, showTracker: true, showNewsletter: true, deliveryZones: [], outsideFee: 120 });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -186,12 +186,52 @@ const AdminSettings = () => {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
-                <label className="text-[10.5px] uppercase tracking-wider font-semibold text-neutral-600">Delivery fee (৳)</label>
+                <label className="text-[10.5px] uppercase tracking-wider font-semibold text-neutral-600">Default delivery fee (৳)</label>
                 <input data-testid="settings-deliveryFee" type="number" value={s.deliveryFee} onChange={(e) => setS({ ...s, deliveryFee: parseFloat(e.target.value) || 0 })} className="mt-1 w-full h-11 px-3 rounded-xl bg-neutral-50 border border-neutral-200 outline-none focus:border-emerald-500 text-sm" />
+                <div className="text-[10.5px] text-neutral-500 mt-1">যখন কোনো জোন ম্যাচ করে না বা এখনো এলাকা লিখেনি</div>
               </div>
               <div>
                 <label className="text-[10.5px] uppercase tracking-wider font-semibold text-neutral-600">Free delivery above (৳)</label>
                 <input data-testid="settings-freeDeliveryAbove" type="number" value={s.freeDeliveryAbove} onChange={(e) => setS({ ...s, freeDeliveryAbove: parseFloat(e.target.value) || 0 })} className="mt-1 w-full h-11 px-3 rounded-xl bg-neutral-50 border border-neutral-200 outline-none focus:border-emerald-500 text-sm" />
+                <div className="text-[10.5px] text-neutral-500 mt-1">জোন না থাকলে এই সীমার উপরে ফ্রি</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Delivery zones — per area fees */}
+          <div className="rounded-2xl bg-white border border-neutral-100 p-4 md:p-5">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <div className="w-9 h-9 rounded-lg bg-emerald-700 grid place-items-center"><Truck className="w-4 h-4 text-white" /></div>
+                <div>
+                  <div className="font-extrabold text-sm">ডেলিভারি জোন / এলাকা</div>
+                  <div className="text-[10.5px] text-neutral-500">কোন এলাকায় ফ্রি ডেলিভারি, কোন এলাকায় কত চার্জ — এখান থেকে ঠিক করুন। গ্রাহকের টাইপ করা এলাকার সাথে ম্যাচ করবে।</div>
+                </div>
+              </div>
+              <button data-testid="settings-zone-add" type="button" onClick={() => setS({ ...s, deliveryZones: [...(s.deliveryZones || []), { name: '', fee: 0, freeAbove: null }] })} className="inline-flex items-center gap-1 bg-emerald-700 text-white text-[11.5px] font-bold h-8 px-3 rounded-full hover:bg-emerald-800"><Plus className="w-3 h-3" /> জোন যোগ</button>
+            </div>
+            {(s.deliveryZones || []).length === 0 ? (
+              <div className="text-[11.5px] text-neutral-500 italic bg-neutral-50 rounded-lg p-3">কোনো জোন নেই। উপরের "জোন যোগ" চেপে যোগ করুন। যেমন "নাটোর" → ফি ০ (ভিতরে ফ্রি), "রাজশাহী" → ফি ৮০ (বাইরে চার্জ)।</div>
+            ) : (
+              <div className="space-y-2">
+                {s.deliveryZones.map((z, i) => (
+                  <div key={i} data-testid={`settings-zone-row-${i}`} className="grid grid-cols-12 gap-2 items-center bg-emerald-50/40 rounded-xl p-2 border border-emerald-100">
+                    <input data-testid={`settings-zone-name-${i}`} value={z.name || ''} onChange={(e) => setS({ ...s, deliveryZones: s.deliveryZones.map((x, idx) => idx === i ? { ...x, name: e.target.value } : x) })} placeholder="এলাকার নাম (যেমন নাটোর, মিরপুর)" className="col-span-5 h-10 px-2 rounded-lg bg-white border border-neutral-200 outline-none focus:border-emerald-500 text-[12.5px]" />
+                    <input data-testid={`settings-zone-fee-${i}`} type="number" value={z.fee ?? ''} onChange={(e) => setS({ ...s, deliveryZones: s.deliveryZones.map((x, idx) => idx === i ? { ...x, fee: parseFloat(e.target.value) || 0 } : x) })} placeholder="ফি (০=ফ্রি)" className="col-span-3 h-10 px-2 rounded-lg bg-white border border-neutral-200 outline-none focus:border-emerald-500 text-[12.5px]" />
+                    <input data-testid={`settings-zone-freeAbove-${i}`} type="number" value={z.freeAbove ?? ''} onChange={(e) => { const v = e.target.value; setS({ ...s, deliveryZones: s.deliveryZones.map((x, idx) => idx === i ? { ...x, freeAbove: v === '' ? null : parseFloat(v) } : x) }); }} placeholder="ফ্রি হবে ৳" className="col-span-3 h-10 px-2 rounded-lg bg-white border border-neutral-200 outline-none focus:border-emerald-500 text-[12.5px]" />
+                    <button data-testid={`settings-zone-remove-${i}`} type="button" onClick={() => setS({ ...s, deliveryZones: s.deliveryZones.filter((_, idx) => idx !== i) })} className="col-span-1 w-8 h-8 grid place-items-center rounded-full text-neutral-400 hover:text-red-600 hover:bg-red-50 mx-auto"><X className="w-4 h-4" /></button>
+                  </div>
+                ))}
+              </div>
+            )}
+            <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3 border-t border-neutral-100 pt-3">
+              <div>
+                <label className="text-[10.5px] uppercase tracking-wider font-semibold text-neutral-600">Outside zone fee (৳)</label>
+                <input data-testid="settings-outsideFee" type="number" value={s.outsideFee ?? 0} onChange={(e) => setS({ ...s, outsideFee: parseFloat(e.target.value) || 0 })} className="mt-1 w-full h-11 px-3 rounded-xl bg-neutral-50 border border-neutral-200 outline-none focus:border-emerald-500 text-sm" />
+                <div className="text-[10.5px] text-neutral-500 mt-1">উপরের কোনো জোনের সাথে না মিললে এই ফি প্রয়োগ হবে</div>
+              </div>
+              <div className="text-[11px] text-emerald-800 bg-emerald-50 border border-emerald-200 rounded-lg p-2.5">
+                <span className="font-bold">উদাহরণ:</span> "নাটোর" নাম দিয়ে ফি=০ ও freeAbove ফাঁকা রাখলে নাটোরে সব অর্ডারে ফ্রি ডেলিভারি।
               </div>
             </div>
           </div>
@@ -202,6 +242,41 @@ const AdminSettings = () => {
       )}
       {tab === 'branding' && (
         <form onSubmit={saveSite} className="max-w-2xl space-y-4">
+          {/* 10 preset themes */}
+          <div className="rounded-2xl bg-white border border-neutral-100 p-4 md:p-5">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-9 h-9 rounded-lg bg-fuchsia-600 grid place-items-center"><Palette className="w-4 h-4 text-white" /></div>
+              <div>
+                <div className="font-extrabold text-sm">প্রিসেট থিম ({THEMES.length}টি)</div>
+                <div className="text-[10.5px] text-neutral-500">যেকোনো একটি সিলেক্ট করলে সাইটের সব রঙ সেই থিমে পরিবর্তন হবে। ডিজাইন একই থাকবে।</div>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2.5">
+              {THEMES.map((t) => {
+                const active = s.themeId === t.id;
+                return (
+                  <label key={t.id} data-testid={`theme-radio-${t.id}`} className={`cursor-pointer rounded-2xl border-2 p-2.5 transition-all ${active ? 'border-neutral-900 shadow-md' : 'border-neutral-200 hover:border-neutral-400'}`}>
+                    <input type="radio" name="theme" value={t.id} checked={active} onChange={() => setS({ ...s, themeId: t.id, brandColor: t.primary, brandColorDark: t.dark })} className="sr-only" />
+                    <div className="flex items-center justify-between">
+                      <div className="flex gap-1">
+                        <span className="w-5 h-5 rounded-full ring-2 ring-white shadow" style={{ background: t.primary }} />
+                        <span className="w-5 h-5 rounded-full ring-2 ring-white shadow" style={{ background: t.mid }} />
+                        <span className="w-5 h-5 rounded-full ring-2 ring-white shadow" style={{ background: t.accent }} />
+                      </div>
+                      {active && <div className="w-5 h-5 rounded-full bg-neutral-900 text-white grid place-items-center"><Check className="w-3 h-3" /></div>}
+                    </div>
+                    <div className="mt-2 text-[12px] font-bold text-neutral-800">{t.name}</div>
+                    <div className="mt-1 h-2 rounded-full overflow-hidden flex">
+                      <span className="flex-1" style={{ background: t.primary }} />
+                      <span className="flex-1" style={{ background: t.mid }} />
+                      <span className="flex-1" style={{ background: t.light }} />
+                    </div>
+                  </label>
+                );
+              })}
+            </div>
+          </div>
+
           <div className="rounded-2xl bg-white border border-neutral-100 p-4 md:p-5">
             <div className="flex items-center gap-2 mb-3">
               <div className="w-9 h-9 rounded-lg bg-emerald-700 grid place-items-center"><ImageIcon className="w-4 h-4 text-white" /></div>

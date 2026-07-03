@@ -9,7 +9,7 @@ import os
 import logging
 from pathlib import Path
 from pydantic import BaseModel, Field, EmailStr
-from typing import List, Optional, Literal
+from typing import List, Optional, Literal, Dict, Any
 import uuid
 from datetime import datetime, timedelta
 from passlib.context import CryptContext
@@ -246,6 +246,12 @@ class SiteSettings(BaseModel):
     brandColor: Optional[str] = '#047857'         # primary accent color used across UI
     brandColorDark: Optional[str] = '#065f46'     # hover / darker shade
     themeId: Optional[str] = 'emerald'            # preset theme id from THEMES
+    # Delivery zones — admin-controlled per-area fees + free zones
+    # Each zone: { name: str, fee: float, freeAbove: Optional[float] }
+    # Zone matching is done client-side against the customer's typed area (case-insensitive substring).
+    # The first matching zone wins; if none matches, `deliveryFee` (global) is used.
+    deliveryZones: Optional[List[Dict[str, Any]]] = []
+    outsideFee: Optional[float] = 120             # fee for areas that don't match any zone
     # Feature toggles
     showChatWidget: Optional[bool] = True
     showTracker: Optional[bool] = True
@@ -577,6 +583,7 @@ SITE_DEFAULTS = {
     'deliveryFee': 60, 'freeDeliveryAbove': 500, 'aboutText': '',
     'globalDiscountPercent': 0, 'globalDiscountLabel': '', 'taxPercent': 0, 'minOrderAmount': 0,
     'logoUrl': '', 'brandColor': '#047857', 'brandColorDark': '#065f46', 'themeId': 'emerald',
+    'deliveryZones': [], 'outsideFee': 120,
     'showChatWidget': True, 'showTracker': True, 'showNewsletter': True,
 }
 

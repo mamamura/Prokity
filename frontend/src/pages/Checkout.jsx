@@ -67,7 +67,7 @@ const saveGuestOrder = (order, phone) => {
 };
 
 const Checkout = () => {
-  const { cart, subtotal, delivery, siteDiscount, siteDiscountPercent, siteDiscountLabel, tax, taxPercent, minOrderAmount, clearCart } = useCart();
+  const { cart, subtotal, delivery, siteDiscount, siteDiscountPercent, siteDiscountLabel, tax, taxPercent, minOrderAmount, clearCart, deliveryZones, matchedZone, setDeliveryArea } = useCart();
   const { user } = useAuth();
   const { toast } = useToast();
   const nav = useNavigate();
@@ -106,6 +106,14 @@ const Checkout = () => {
       }
     })();
   }, [user]);
+
+  useEffect(() => {
+    // Reactively update the delivery-zone-matching area whenever the customer
+    // types in a new address (guest flow) or picks a saved one (logged-in flow).
+    const useSaved = !newMode && addresses.length > 0 && selectedAddrId;
+    const source = useSaved ? addresses.find((a) => a.id === selectedAddrId) : addr;
+    setDeliveryArea(source?.area || '');
+  }, [addr.area, selectedAddrId, addresses, newMode, setDeliveryArea]);
 
   useEffect(() => {
     if (cart.length === 0 && !order) nav('/cart');

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { api } from '../../lib/api';
 import { Plus, Pencil, Trash2, X, FolderTree, Upload, Image as ImageIcon } from 'lucide-react';
 import { useToast } from '../../hooks/use-toast';
+import { compressImage } from '../../lib/image';
 
 const emptyCat = { slug: '', name: '', icon: 'Leaf', image: '' };
 
@@ -16,10 +17,15 @@ const CatForm = ({ initial, onClose, onSaved }) => {
   const onFile = async (e) => {
     const file = e.target.files?.[0]; if (!file) return;
     setUploading(true);
-    const reader = new FileReader();
-    reader.onload = () => { setF((s) => ({ ...s, image: reader.result })); setUploading(false); };
-    reader.onerror = () => { toast({ title: 'ছবি পড়া যায়নি', variant: 'destructive' }); setUploading(false); };
-    reader.readAsDataURL(file);
+    try {
+      const dataUrl = await compressImage(file, { maxWidth: 800, maxHeight: 800, quality: 0.85 });
+      setF((s) => ({ ...s, image: dataUrl }));
+    } catch (err) {
+      toast({ title: 'ছবি পড়া যায়নি', description: err.message || 'অন্য ছবি চেষ্টা করুন', variant: 'destructive' });
+    } finally {
+      setUploading(false);
+      e.target.value = '';
+    }
   };
 
   const submit = async (e) => {

@@ -14,7 +14,10 @@ export const CartProvider = ({ children }) => {
     globalDiscountLabel: '',
     taxPercent: 0,
     minOrderAmount: 0,
+    deliveryZones: [],
+    outsideFee: 120,
   });
+  const [deliveryArea, setDeliveryArea] = useState('');
   useEffect(() => { localStorage.setItem('os_cart', JSON.stringify(cart)); }, [cart]);
   useEffect(() => {
     (async () => {
@@ -27,6 +30,8 @@ export const CartProvider = ({ children }) => {
           globalDiscountLabel: data.globalDiscountLabel ?? '',
           taxPercent: data.taxPercent ?? 0,
           minOrderAmount: data.minOrderAmount ?? 0,
+          deliveryZones: Array.isArray(data.deliveryZones) ? data.deliveryZones : [],
+          outsideFee: data.outsideFee ?? 120,
         });
       } catch (_) {}
     })();
@@ -59,7 +64,38 @@ export const CartProvider = ({ children }) => {
     return Math.round(base * (pct / 100));
   }, [subtotal, siteDiscount, rules.taxPercent]);
   const taxableSubtotal = useMemo(() => Math.max(0, subtotal - siteDiscount), [subtotal, siteDiscount]);
-  const delivery = useMemo(() => (taxableSubtotal > 0 && taxableSubtotal < rules.freeDeliveryAbove ? rules.deliveryFee : 0), [taxableSubtotal, rules]);
+
+  // Zone-based delivery: if deliveryArea matches any admin-configured zone
+  // (case-insensitive substring or vice-versa), use that zone's fee (with its
+  // own freeAbove threshold if provided). Otherwise use outsideFee for typed
+  // areas, or global deliveryFee when no area is typed yet.
+  const matchedZone = useMemo(() => {
+    if (!deliveryArea || !rules.deliveryZones?.length) return null;
+    const a = deliveryArea.trim().toLowerCase();
+    if (!a) return null;
+    return rules.deliveryZones.find((z) => {
+      const n = (z?.name || '').trim().toLowerCase();
+      if (!n) return false;
+      return n === a || a.includes(n) || n.includes(a);
+    }) || null;
+  }, [deliveryArea, rules.deliveryZones]);
+
+  const delivery = useMemo(() => {
+    if (taxableSubtotal <= 0) return 0;
+    // If admin configured zones and user typed an area, use zone logic.
+    if (rules.deliveryZones?.length && deliveryArea) {
+      if (matchedZone) {
+        const fee = Number(matchedZone.fee || 0);
+        const freeAbove = matchedZone.freeAbove != null ? Number(matchedZone.freeAbove) : null;
+        if (freeAbove != null && taxableSubtotal >= freeAbove) return 0;
+        return fee;
+      }
+      return Number(rules.outsideFee || rules.deliveryFee || 0);
+    }
+    // No zones configured or no area typed — fall back to global settings.
+    if (taxableSubtotal >= rules.freeDeliveryAbove) return 0;
+    return rules.deliveryFee;
+  }, [taxableSubtotal, rules, deliveryArea, matchedZone]);
   const total = Math.max(0, subtotal - siteDiscount + tax + delivery);
 
   return (
@@ -71,6 +107,9 @@ export const CartProvider = ({ children }) => {
       siteDiscountLabel: rules.globalDiscountLabel || '',
       taxPercent: rules.taxPercent || 0,
       minOrderAmount: rules.minOrderAmount || 0,
+      deliveryZones: rules.deliveryZones || [],
+      outsideFee: rules.outsideFee || 0,
+      deliveryArea, setDeliveryArea, matchedZone,
     }}>
       {children}
     </CartContext.Provider>

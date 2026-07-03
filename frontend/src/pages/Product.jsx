@@ -65,16 +65,25 @@ const ProductPage = () => {
 
   if (!p) return (<div className="p-8 text-center text-sm text-neutral-500">Loading product…</div>);
 
-  const outOfStock = p.stock === 0;
-  const lowStock = !outOfStock && (p.stock ?? 99) <= 5;
+  // Effective price + unit + stock — uses selected variant if one is chosen
+  const effectivePrice = selectedVariant ? selectedVariant.price : p.price;
+  const effectiveOldPrice = selectedVariant?.oldPrice ?? (selectedVariant ? null : p.oldPrice);
+  const effectiveUnit = selectedVariant ? selectedVariant.label : p.unit;
+  const variantStock = selectedVariant && selectedVariant.stock != null ? selectedVariant.stock : p.stock;
+  const outOfStock = variantStock === 0;
+  const lowStock = !outOfStock && (variantStock ?? 99) <= 5;
   const liked = inWishlist(p.id);
+
+  // Gallery — main image + any additional images (dedup)
+  const galleryImages = Array.from(new Set([p.image, ...(p.images || [])].filter(Boolean)));
+  const activeImage = galleryImages[galleryIdx] || p.image;
 
   const add = () => {
     if (outOfStock) return;
-    addToCart(p, qty);
-    toast({ title: 'Added to cart', description: `${qty} × ${p.name}` });
+    addToCart({ ...p, price: effectivePrice, oldPrice: effectiveOldPrice, unit: effectiveUnit, variantLabel: selectedVariant?.label }, qty);
+    toast({ title: 'কার্টে যোগ হয়েছে', description: `${qty} × ${p.name}${selectedVariant ? ' (' + selectedVariant.label + ')' : ''}` });
   };
-  const buy = () => { if (outOfStock) return; addToCart(p, qty); nav('/cart'); };
+  const buy = () => { if (outOfStock) return; addToCart({ ...p, price: effectivePrice, oldPrice: effectiveOldPrice, unit: effectiveUnit, variantLabel: selectedVariant?.label }, qty); nav('/cart'); };
   const heart = async () => {
     if (!user) { nav('/login?next=/product/' + slug); return; }
     const r = await toggle(p.id);

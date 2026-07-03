@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { api } from '../../lib/api';
 import { useToast } from '../../hooks/use-toast';
 import { Plus, Pencil, Trash2, Save, X, Image as ImageIcon, Eye, EyeOff } from 'lucide-react';
+import { compressImage } from '../../lib/image';
 
 const blank = () => ({ title: '', subtitle: '', image: '', ctaLabel: 'Shop now', ctaLink: '/categories', active: true, order: 0 });
 
@@ -25,9 +26,14 @@ const AdminBanners = () => {
   const openEdit = (b) => { setEditing(b); setForm({ ...b }); setOpen(true); };
   const close = () => { setOpen(false); setEditing(null); };
 
-  const onImage = (e) => {
+  const onImage = async (e) => {
     const file = e.target.files?.[0]; if (!file) return;
-    const r = new FileReader(); r.onload = () => setForm((s) => ({ ...s, image: r.result })); r.readAsDataURL(file);
+    try {
+      const dataUrl = await compressImage(file, { maxWidth: 1600, maxHeight: 1600, quality: 0.85 });
+      setForm((s) => ({ ...s, image: dataUrl }));
+    } catch (_) {
+      toast({ title: 'ছবি লোড ব্যর্থ', variant: 'destructive' });
+    } finally { e.target.value = ''; }
   };
 
   const save = async (e) => {

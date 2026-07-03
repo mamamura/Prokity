@@ -1,0 +1,34 @@
+{
+  "summary": "Iteration 7 testing. Backend: 5/5 pytest PASS (category image upload w/ base64, product w/ gallery+variants, site settings deliveryZones+outsideFee+themeId, seed test-variant-honey has 3 variants + 3 images). Frontend: Product page FIXED — variant picker (variant-option-0/1/2) updates price ৳280→৳500→৳950, 3 gallery-thumb-* render and swap main image. Cart shows selected variant. Admin Settings Branding tab: all 10 theme-radio-* render, theme-radio-rose click + settings-branding-save works (persisted themeId=rose to backend). Admin Settings Delivery tab: settings-zone-add creates rows with name/fee/freeAbove inputs, settings-outsideFee accepts value, settings-delivery-save PERSISTS ZONES (verified via GET). Zone-based delivery in Checkout: নাটোর → ফ্রি (0৳), রাজশাহী → ৳80, ঢাকা (unmatched) → ৳150 (outsideFee) — all correct. Category image upload via UI SUCCEEDS end-to-end (POST /api/admin/categories returns 200 with base64 image saved). Regression: admin login at /portal-7x9k2m4p8q3z6n1v works. All settings reset to defaults after tests.",
+  "backend_issues": { "critical": [], "minor": [] },
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "admin/Settings.jsx saveSite()", "issue": "After clicking settings-delivery-save (and settings-branding-save), backend returns 200 and data IS persisted, but UI shows 'Save failed / Try again' destructive toast. No console errors, no unhandled rejections, no failed network request. Suspect: something after api.put resolves throws (possibly toast() or refresh()) causing the catch branch to fire, giving false negative feedback to admins. Functional impact minor (data saves), UX impact HIGH (admin thinks save failed).", "selector": "[data-testid='settings-delivery-save']", "priority": "MEDIUM"}
+    ],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_iteration7.py",
+    "/app/test_reports/pytest/iteration7.xml"
+  ],
+  "action_items": [
+    "Investigate false 'Save failed' toast in admin/Settings.jsx saveSite. Add console.log(e) inside catch or wrap toast/refresh in their own try/catch to identify what is throwing. Since save actually succeeds, likely a downstream issue (toast return value, refresh() chain, or a subtle promise rejection in useEffect from setSettings). Consider showing the success toast BEFORE await refresh() and moving refresh into its own try/catch block, or replace refresh with a local setS(...) so nothing else can throw."
+  ],
+  "critical_code_review_comments": [
+    "Settings.jsx: saveSite catch shows generic 'Save failed' even when server returned 200 — misleading UX. Move await refresh() outside the try/catch or handle refresh errors separately.",
+    "Categories.jsx / Products.jsx: Name/Slug/Description inputs lack data-testid, making automated testing harder — please add cat-name-input, cat-slug-input, prod-name-input, prod-price-input, prod-description, prod-category-select.",
+    "server.py: POST /api/products (not /api/admin/products) — consider aligning admin endpoints under /admin/ prefix for consistency (categories uses /admin/categories, products doesn't)."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_iteration7.py",
+    "/app/test_reports/iteration_7.json"
+  ],
+  "success_rate": { "backend": "100% (5/5)", "frontend": "~95% — variant/gallery/theme/zones all functional; only false Save-failed toast in admin Settings" },
+  "test_credentials": "admin@organicshop.com / admin123",
+  "seed_data_creation": "Created & deleted TEST_UploadCat during UI test. Created & deleted TEST_ProdIter7 during pytest. Existing seeds untouched.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Backend fully green. Zone-based delivery works. Variant/gallery on public product works. 10-theme grid works. Only outstanding UX issue: false 'Save failed' toast in admin Settings (Delivery + Branding tabs) even though data persists. Site settings were RESET at end of run: themeId=emerald, deliveryZones=[], outsideFee=120.",
+  "rca of the issue": "For the false Save failed toast: PUT /api/admin/settings/site returns 200 in browser (confirmed with page.on('response')). No pageerror, no unhandled rejection, no console.error. Yet destructive toast 'Save failed / Try again' fires. Likely something in saveSite's try block after api.put() throws synchronously — candidates: toast() calls, await refresh() (which uses api.get and then setSettings triggering a useEffect that builds theme CSS). Recommend logging the actual caught error in the catch to identify."
+}

@@ -31,10 +31,15 @@ const ProductForm = ({ initial, categories, onClose, onSaved }) => {
   const onFile = async (e) => {
     const file = e.target.files?.[0]; if (!file) return;
     setUploading(true);
-    const reader = new FileReader();
-    reader.onload = () => { setF((s) => ({ ...s, image: reader.result })); setUploading(false); };
-    reader.onerror = () => { toast({ title: 'ছবি পড়া যায়নি', variant: 'destructive' }); setUploading(false); };
-    reader.readAsDataURL(file);
+    try {
+      const dataUrl = await compressImage(file, { maxWidth: 1400, maxHeight: 1400, quality: 0.85 });
+      setF((s) => ({ ...s, image: dataUrl }));
+    } catch (err) {
+      toast({ title: 'ছবি পড়া যায়নি', description: err.message || 'অন্য ছবি চেষ্টা করুন', variant: 'destructive' });
+    } finally {
+      setUploading(false);
+      e.target.value = '';
+    }
   };
 
   // Multiple images upload — appends to images gallery
@@ -42,15 +47,15 @@ const ProductForm = ({ initial, categories, onClose, onSaved }) => {
     const files = Array.from(e.target.files || []);
     if (!files.length) return;
     setUploading(true);
-    const results = await Promise.all(files.map((file) => new Promise((res, rej) => {
-      const r = new FileReader();
-      r.onload = () => res(r.result);
-      r.onerror = () => rej();
-      r.readAsDataURL(file);
-    })));
-    setF((s) => ({ ...s, images: [...(s.images || []), ...results] }));
-    setUploading(false);
-    e.target.value = ''; // reset input so same file can be re-picked
+    try {
+      const results = await Promise.all(files.map((file) => compressImage(file, { maxWidth: 1400, maxHeight: 1400, quality: 0.85 })));
+      setF((s) => ({ ...s, images: [...(s.images || []), ...results] }));
+    } catch (err) {
+      toast({ title: 'কিছু ছবি লোড হয়নি', description: err.message || 'আবার চেষ্টা করুন', variant: 'destructive' });
+    } finally {
+      setUploading(false);
+      e.target.value = '';
+    }
   };
 
   const removeImage = (i) => setF((s) => ({ ...s, images: (s.images || []).filter((_, idx) => idx !== i) }));
