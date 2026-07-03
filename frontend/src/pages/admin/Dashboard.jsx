@@ -29,6 +29,12 @@ export const AdminLayout = () => {
 
   const closeDrawer = () => setDrawerOpen(false);
 
+  // Opt admin panel out of the storefront anti-copy / no-select CSS + listeners.
+  useEffect(() => {
+    document.body.dataset.admin = '1';
+    return () => { delete document.body.dataset.admin; };
+  }, []);
+
   return (
     <div className="min-h-screen bg-neutral-50 flex">
       {/* Desktop sidebar */}

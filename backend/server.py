@@ -44,6 +44,35 @@ async def _rate_limit_handler(request: Request, exc: RateLimitExceeded):
 
 app.add_exception_handler(RateLimitExceeded, _rate_limit_handler)
 
+# ---------------- Security headers middleware ----------------
+class SecurityHeadersMiddleware(BaseHTTPMiddleware):
+    """Adds industry-standard hardening headers to every response.
+
+    - X-Content-Type-Options: nosniff — blocks MIME sniffing.
+    - X-Frame-Options: DENY — prevents clickjacking via iframes.
+    - Referrer-Policy: strict-origin-when-cross-origin — limits referrer leakage.
+    - Permissions-Policy: disables camera/mic/geolocation for this origin.
+    - Strict-Transport-Security: forces HTTPS for 1 year.
+    - Cross-Origin-Resource-Policy: same-site — restricts asset embedding.
+    - X-Robots-Tag applied only to /api paths (not the SPA) so images
+      served from /api can't be indexed and later crawled off-domain.
+    """
+    async def dispatch(self, request: Request, call_next):
+        response = await call_next(request)
+        response.headers['X-Content-Type-Options'] = 'nosniff'
+        response.headers['X-Frame-Options'] = 'DENY'
+        response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
+        response.headers['Permissions-Policy'] = "camera=(), microphone=(), geolocation=(), payment=()"
+        response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
+        response.headers['Cross-Origin-Resource-Policy'] = 'same-site'
+        response.headers['X-XSS-Protection'] = '1; mode=block'
+        if request.url.path.startswith('/api'):
+            response.headers['X-Robots-Tag'] = 'noindex, nofollow, noarchive, nosnippet'
+            response.headers['Cache-Control'] = 'no-store'
+        return response
+
+app.add_middleware(SecurityHeadersMiddleware)
+
 api = APIRouter(prefix='/api')
 
 
@@ -1008,7 +1037,8 @@ async def payment_verify(body: PaymentVerify):
 
 # Orders
 @api.post('/orders')
-async def create_order(body: OrderCreate, user = Depends(get_optional_user)):
+@limiter.limit('30/minute')
+async def create_order(request: Request, body: OrderCreate, user = Depends(get_optional_user)):
     # For bKash/Nagad — payment is verified manually by admin; require txn id
     if body.paymentMethod in ('bkash', 'nagad'):
         if not body.paymentPhone or not body.paymentTxn:
@@ -1075,7 +1105,8 @@ async def my_orders(user = Depends(get_current_user)):
 
 # Public order tracking — guest customers can look up by order number + phone (no auth)
 @api.get('/orders/track/{order_no}')
-async def track_order_public(order_no: str, phone: str):
+@limiter.limit('20/minute')
+async def track_order_public(request: Request, order_no: str, phone: str):
     if not phone or len(phone.strip()) < 4:
         raise HTTPException(400, 'Phone is required to track an order')
     p = phone.strip()
@@ -1366,18 +1397,6 @@ async def seed():
 
 
 app.include_router(api)
-
-# Security headers middleware
-class SecurityHeadersMiddleware(BaseHTTPMiddleware):
-    async def dispatch(self, request, call_next):
-        response = await call_next(request)
-        response.headers['X-Content-Type-Options'] = 'nosniff'
-        response.headers['X-Frame-Options'] = 'SAMEORIGIN'
-        response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
-        response.headers['Permissions-Policy'] = 'geolocation=(), microphone=(), camera=()'
-        return response
-
-app.add_middleware(SecurityHeadersMiddleware)
 
 # CORS — narrow to known origins in production via CORS_ORIGINS env (comma-separated).
 _cors_env = os.environ.get('CORS_ORIGINS', '').strip()

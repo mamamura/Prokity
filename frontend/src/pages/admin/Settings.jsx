@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { api } from '../../lib/api';
 import { useToast } from '../../hooks/use-toast';
 import { THEMES } from '../../lib/themes';
+import { useSite } from '../../contexts/SiteContext';
 import { Save, Smartphone, Wallet, Info, Globe, Truck, Building2, MessageCircle as MC, Percent, Tag, Palette, Upload, Image as ImageIcon, X, ToggleRight, Check, Plus } from 'lucide-react';
 
 const tabs = [
@@ -15,6 +16,7 @@ const tabs = [
 
 const AdminSettings = () => {
   const { toast } = useToast();
+  const { refresh } = useSite();
   const [tab, setTab] = useState('branding');
   const [p, setP] = useState({ bkashNumber: '', nagadNumber: '', bkashType: 'personal', nagadType: 'personal', instructions: '' });
   const [s, setS] = useState({ siteName: '', tagline: '', contactPhone: '', contactEmail: '', contactAddress: '', facebookUrl: '', instagramUrl: '', whatsappNumber: '', deliveryFee: 60, freeDeliveryAbove: 500, aboutText: '', globalDiscountPercent: 0, globalDiscountLabel: '', taxPercent: 0, minOrderAmount: 0, logoUrl: '', brandColor: '#047857', brandColorDark: '#065f46', themeId: 'emerald', showChatWidget: true, showTracker: true, showNewsletter: true, deliveryZones: [], outsideFee: 120 });
@@ -42,9 +44,15 @@ const AdminSettings = () => {
   const saveSite = async (e) => {
     e.preventDefault();
     setSaving(true);
-    try { await api.put('/admin/settings/site', s); toast({ title: 'Site settings updated' }); await refresh(); }
-    catch (e) { toast({ title: 'Save failed', description: e.response?.data?.detail || 'Try again', variant: 'destructive' }); }
-    finally { setSaving(false); }
+    try {
+      await api.put('/admin/settings/site', s);
+      toast({ title: 'Site settings updated' });
+    } catch (err) {
+      toast({ title: 'Save failed', description: err.response?.data?.detail || 'Try again', variant: 'destructive' });
+    } finally { setSaving(false); }
+    // Refresh global site context AFTER the save promise settles so that a failure
+    // here (e.g., a race with unmounted setState) never triggers a false "Save failed" toast.
+    refresh?.().catch(() => {});
   };
 
   const onLogoFile = (e) => {

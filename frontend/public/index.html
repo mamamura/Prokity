@@ -11,6 +11,36 @@
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
         <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
         <title>প্রকৃতির ঘ্রাণ · Organic Shop</title>
+        <!-- Anti-theft: discourage content scraping via CSS. Cannot be bypassed via right-click,
+             image drag, or basic text selection. Admin panel (path prefix /portal-*) opts out. -->
+        <style>
+            body:not([data-admin="1"]) {
+                -webkit-user-select: none;
+                -moz-user-select: none;
+                -ms-user-select: none;
+                user-select: none;
+                -webkit-touch-callout: none;
+                -webkit-tap-highlight-color: transparent;
+            }
+            /* Allow selecting inside inputs / textareas / contenteditable so forms still work */
+            body:not([data-admin="1"]) input,
+            body:not([data-admin="1"]) textarea,
+            body:not([data-admin="1"]) [contenteditable="true"],
+            body:not([data-admin="1"]) [data-allow-select] {
+                -webkit-user-select: text !important;
+                -moz-user-select: text !important;
+                -ms-user-select: text !important;
+                user-select: text !important;
+            }
+            body:not([data-admin="1"]) img {
+                -webkit-user-drag: none;
+                -khtml-user-drag: none;
+                -moz-user-drag: none;
+                -o-user-drag: none;
+                user-drag: none;
+                pointer-events: auto;
+            }
+        </style>
         <script>
             // Silence a specific benign perf DataCloneError that some browsers surface.
             window.addEventListener("error", function (e) {
@@ -24,6 +54,50 @@
                     e.preventDefault();
                 }
             }, true);
+
+            // Anti-theft: block right-click, drag, common save shortcuts on the public storefront.
+            // The React admin shell sets document.body.dataset.admin = "1" on mount so admins
+            // retain full browser capability.
+            (function () {
+                function isAdmin() {
+                    return document.body && document.body.dataset && document.body.dataset.admin === "1";
+                }
+                function isEditable(target) {
+                    if (!target) return false;
+                    var tag = (target.tagName || "").toLowerCase();
+                    return tag === "input" || tag === "textarea" || target.isContentEditable;
+                }
+                // Right-click context menu — off for storefront
+                document.addEventListener("contextmenu", function (e) {
+                    if (!isAdmin()) { e.preventDefault(); }
+                }, false);
+                // Image / link dragging — off for storefront
+                document.addEventListener("dragstart", function (e) {
+                    if (!isAdmin()) { e.preventDefault(); }
+                }, false);
+                // Selection start on non-form elements — off for storefront
+                document.addEventListener("selectstart", function (e) {
+                    if (!isAdmin() && !isEditable(e.target)) { e.preventDefault(); }
+                }, false);
+                // Copy / cut on non-form elements — off for storefront
+                document.addEventListener("copy", function (e) {
+                    if (!isAdmin() && !isEditable(e.target)) { e.preventDefault(); }
+                }, false);
+                document.addEventListener("cut", function (e) {
+                    if (!isAdmin() && !isEditable(e.target)) { e.preventDefault(); }
+                }, false);
+                // Discourage common save/inspect shortcuts on the storefront.
+                document.addEventListener("keydown", function (e) {
+                    if (isAdmin()) return;
+                    var key = (e.key || "").toLowerCase();
+                    // Ctrl/Cmd + S (Save), Ctrl/Cmd + U (View source), Ctrl/Cmd + P (Print)
+                    if ((e.ctrlKey || e.metaKey) && (key === "s" || key === "u" || key === "p")) {
+                        // Allow print on the /receipt route so users can still download PDF receipts
+                        if (key === "p" && (location.pathname || "").indexOf("/receipt") === 0) return;
+                        e.preventDefault();
+                    }
+                }, false);
+            })();
         </script>
     </head>
     <body>
