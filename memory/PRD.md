@@ -84,7 +84,14 @@ User language: **Bengali (বাংলা)** — agent responds in Bengali.
 - **Rate limiting** (slowapi): login 10/min, signup 5/min, forgot 5/min, reset 5/min, orders 30/min, public order tracking 20/min. Excess returns 429 with a Bengali-friendly message.
 - **False "Save failed" toast fix** in admin/Settings.jsx — `refresh()` moved outside the try/catch so its rejection cannot trigger the destructive toast when the save itself succeeded.
 
+### Iteration 9 (Feb 2026) — Bengali notifications + admin orders UX
+- **All order-status notifications now in Bengali** (`server.py` admin_update_order): confirmed/shipped/delivered/cancelled all send Bengali title + body with the order number.
+- **Notification click → order detail** (`Notifications.jsx`): each notification with `orderId` shows a 'বিস্তারিত দেখুন →' hint and clicking it navigates to `/order/{id}`. Support-reply notifications route to `/messages`.
+- **Admin Orders — differentiated card colors** (`admin/Orders.jsx`): each order card now has a status-tinted background + 4px left accent stripe (amber for pending, blue for confirmed, violet for shipped, emerald for delivered, red for cancelled) and an inline uppercase status badge next to the orderNo, so admins can distinguish orders at a glance.
+- **Bug fix**: guest orders (userId=None) no longer broadcast status update notifications to ALL customers — `push_notification` is now guarded by `if o.get('userId')` in both `admin_update_order` and `admin_verify_payment`.
+
 ## Test Results
+- **Iteration 9**: Backend 7/7 pass, Frontend 3/3 flows pass. Bengali status notifications, click-to-detail navigation, admin card colors for all 5 statuses verified. Guest broadcast bug fixed & verified via direct DB check.
 - **Iteration 8**: Backend 7/7 pass (headers + all rate limits verified); Frontend 100% (anti-theft on storefront, admin opt-out, Ctrl+P allowed on /receipt, Settings save regression fixed). See `/app/test_reports/iteration_8.json`.
 - **Iteration 7**: Backend 5/5; Frontend variant/gallery/theme/zones green; only issue = false "Save failed" toast (now fixed in it. 8).
 - **Iteration 5**: Backend 5/5 pytest passed; frontend 100%. See `/app/test_reports/iteration_5.json`.

@@ -738,7 +738,8 @@ async def admin_verify_payment(order_id: str, body: PaymentVerifyAdmin, admin = 
     else:
         title = f"পেমেন্ট সমস্যা · {o['orderNo']}"
         msg = body.note or 'আপনার পেমেন্ট ভেরিফাই করা যায়নি। ট্রানজেকশন আইডি চেক করে আবার চেষ্টা করুন।'
-    await push_notification(o['userId'], title, msg, 'order', order_id)
+    if o.get('userId'):
+        await push_notification(o['userId'], title, msg, 'order', order_id)
     o = await db.orders.find_one({'id': order_id}); o.pop('_id', None)
     return o
 
@@ -1160,13 +1161,14 @@ async def admin_update_order(order_id: str, body: OrderStatusUpdate, admin = Dep
         'cancelled': f"আপনার অর্ডার {o['orderNo']} বাতিল করা হয়েছে। কোনো প্রশ্ন থাকলে সাপোর্টে যোগাযোগ করুন।",
         'pending': f"আপনার অর্ডার {o['orderNo']} পুনরায় রিভিউতে রয়েছে।",
     }
-    await push_notification(
-        o['userId'],
-        status_titles_bn.get(body.status, f"অর্ডার আপডেট · {o['orderNo']}"),
-        status_msgs_bn.get(body.status, ''),
-        'order',
-        order_id,
-    )
+    if o.get('userId'):
+        await push_notification(
+            o['userId'],
+            status_titles_bn.get(body.status, f"অর্ডার আপডেট · {o['orderNo']}"),
+            status_msgs_bn.get(body.status, ''),
+            'order',
+            order_id,
+        )
     o = await db.orders.find_one({'id': order_id}); o.pop('_id', None)
     return o
 
